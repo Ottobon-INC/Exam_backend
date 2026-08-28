@@ -1,10 +1,57 @@
-export const memoryUsers = new Map()
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { supabase } from '../config/db.js'
 import bcrypt from 'bcryptjs'
 
-// In-memory fallback stores
-const memorySlots = new Map()       // examId -> Array of slots
-const memoryRegistrations = new Map() // `${candidateId}_${examId}` -> registration object
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DATA_FILE = path.join(__dirname, '../../data_store.json')
+
+export const memorySlots = new Map()       // examId -> Array of slots
+export const memoryRegistrations = new Map() // `${candidateId}_${examId}` -> registration object
+export const memoryUsers = new Map()
+
+// Load persisted state from disk on startup
+const loadStateFromDisk = () => {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8')
+      const data = JSON.parse(raw)
+
+      if (data.slots) {
+        Object.entries(data.slots).forEach(([k, val]) => memorySlots.set(k, val))
+      }
+      if (data.registrations) {
+        Object.entries(data.registrations).forEach(([k, val]) => memoryRegistrations.set(k, val))
+      }
+      if (data.users) {
+        Object.entries(data.users).forEach(([k, val]) => memoryUsers.set(k, val))
+      }
+      console.log(`✅ Restored local data store from disk: ${memorySlots.size} slot groups, ${memoryRegistrations.size} registrations.`)
+    }
+  } catch (err) {
+    console.error('Failed to load local data store from disk:', err)
+  }
+}
+
+export const saveStateToDisk = () => {
+  try {
+    const slotsObj = {}
+    memorySlots.forEach((v, k) => (slotsObj[k] = v))
+
+    const regsObj = {}
+    memoryRegistrations.forEach((v, k) => (regsObj[k] = v))
+
+    const usersObj = {}
+    memoryUsers.forEach((v, k) => (usersObj[k] = v))
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify({ slots: slotsObj, registrations: regsObj, users: usersObj }, null, 2))
+  } catch (err) {
+    console.error('Failed to save data store to disk:', err)
+  }
+}
+
+loadStateFromDisk()
 
 export const getExamSlots = async (req, res) => {
   try {
@@ -20,19 +67,22 @@ export const getExamSlots = async (req, res) => {
       dbSlots = data
     }
 
-    const memSlots = memorySlots.get(String(examId)) || []
     const slotMap = new Map()
 
-    // Add memory slots first
-    memSlots.forEach((s) => {
-      slotMap.set(s.id, {
-        id: s.id,
-        examId: s.exam_id || s.examId || examId,
-        startTime: s.start_time || s.startTime,
-        endTime: s.end_time || s.endTime,
-        capacity: Number(s.capacity) || 30,
-      })
-    })
+    // Add memory slots matching examId case-insensitively
+    for (const [k, arr] of memorySlots.entries()) {
+      if (String(k).toLowerCase() === String(examId).toLowerCase()) {
+        (arr || []).forEach((s) => {
+          slotMap.set(s.id, {
+            id: s.id,
+            examId: s.exam_id || s.examId || examId,
+            startTime: s.start_time || s.startTime,
+            endTime: s.end_time || s.endTime,
+            capacity: Number(s.capacity) || 30,
+          })
+        })
+      }
+    }
 
     // Override / include database slots
     dbSlots.forEach((s) => {
@@ -46,6 +96,7 @@ export const getExamSlots = async (req, res) => {
     })
 
     const combinedSlots = Array.from(slotMap.values())
+
 
     // Calculate booked counts
     const { data: dbRegs } = await supabase
@@ -106,6 +157,7 @@ export const createExamSlot = async (req, res) => {
     const key = String(examId)
     if (!memorySlots.has(key)) memorySlots.set(key, [])
     memorySlots.get(key).push(slotObj)
+    saveStateToDisk()
 
     // Store in Supabase if available
     const { data, error } = await supabase
@@ -140,6 +192,7 @@ export const deleteExamSlot = async (req, res) => {
     if (memorySlots.has(examId)) {
       const list = memorySlots.get(examId).filter((s) => s.id !== slotId)
       memorySlots.set(examId, list)
+      saveStateToDisk()
     }
 
     res.json({ message: 'Slot deleted successfully' })
@@ -158,11 +211,12 @@ export const bulkAssignCandidates = async (req, res) => {
     }
 
     let assignedCount = 0
+    const assignedList = []
 
     for (const c of candidates) {
       const email = c.email?.trim().toLowerCase()
       const rollNumber = c.roll_number || c.rollNumber || `STU-${Math.floor(1000 + Math.random() * 9000)}`
-      const password = c.password || 'Student@123'
+      const password = c.password || `Pass@${Math.floor(1000 + Math.random() * 9000)}`
       const name = c.name || 'Student Candidate'
 
       if (!email) continue
@@ -215,7 +269,6 @@ export const bulkAssignCandidates = async (req, res) => {
           }
         }
       }
-
       if (candidateUser) {
         const key = `${candidateUser.id}_${examId}`
         memoryRegistrations.set(key, {
@@ -235,15 +288,23 @@ export const bulkAssignCandidates = async (req, res) => {
           candidate_id: candidateUser.id,
         })
         assignedCount++
+        assignedList.push({
+          name,
+          email,
+          rollNumber,
+          password,
+        })
       }
     }
 
-    res.json({ message: `Successfully assigned ${assignedCount} students to exam`, assignedCount })
+    saveStateToDisk()
+    res.json({ message: `Successfully assigned ${assignedCount} students to exam`, assignedCount, assignedStudents: assignedList })
   } catch (err) {
     console.error('Error bulk assigning candidates:', err)
     res.status(500).json({ error: err.message || 'Failed to assign candidates' })
   }
 }
+
 
 export const getCandidateAssignedExams = async (req, res) => {
   try {
@@ -326,7 +387,12 @@ export const bookSlot = async (req, res) => {
 
     if (!slotId) return res.status(400).json({ error: 'Slot ID is required' })
 
-    let slots = memorySlots.get(examId) || []
+    let slots = []
+    for (const [k, arr] of memorySlots.entries()) {
+      if (String(k).toLowerCase() === String(examId).toLowerCase()) {
+        slots.push(...(arr || []))
+      }
+    }
     const { data: dbSlots } = await supabase.from('ex_exam_slots').select('*').eq('exam_id', examId)
     if (dbSlots && dbSlots.length > 0) {
       const slotMap = new Map()
@@ -352,6 +418,7 @@ export const bookSlot = async (req, res) => {
     }
 
     memoryRegistrations.set(regKey, booking)
+    saveStateToDisk()
 
     await supabase.from('ex_exam_registrations').upsert({
       exam_id: examId,
@@ -368,6 +435,7 @@ export const bookSlot = async (req, res) => {
     res.status(500).json({ error: err.message || 'Failed to book slot' })
   }
 }
+
 
 export const getMyBooking = async (req, res) => {
   try {
@@ -391,12 +459,14 @@ export const getMyBooking = async (req, res) => {
           candidateId: data.candidate_id,
           startTime: data.slot_start_time,
           endTime: data.slot_end_time,
+          bookedAt: data.booked_at,
         }
       }
     }
 
     res.json({ booking: booking || null })
   } catch (err) {
+    console.error('Error fetching booking:', err)
     res.status(500).json({ error: err.message || 'Failed to fetch booking' })
   }
 }
@@ -404,34 +474,11 @@ export const getMyBooking = async (req, res) => {
 export const getAssignedStudents = async (req, res) => {
   try {
     const { examId } = req.params
-
     const candidatesMap = new Map()
 
-    // 1. Fetch from Database ex_exam_registrations
-    const { data: dbRegs } = await supabase
-      .from('ex_exam_registrations')
-      .select('candidate_id, slot_id, slot_start_time, slot_end_time, assigned_at, booked_at, ex_users(name, email, roll_number)')
-      .eq('exam_id', examId)
-
-    if (dbRegs) {
-      dbRegs.forEach((r) => {
-        candidatesMap.set(r.candidate_id, {
-          candidateId: r.candidate_id,
-          name: r.ex_users?.name || 'Student Candidate',
-          email: r.ex_users?.email || '',
-          rollNumber: r.ex_users?.roll_number || '',
-          slotId: r.slot_id,
-          slotStartTime: r.slot_start_time,
-          slotEndTime: r.slot_end_time,
-          assignedAt: r.assigned_at,
-          bookedAt: r.booked_at,
-        })
-      })
-    }
-
-    // 2. Fetch memory fallbacks
+    // 1. Fetch memory fallbacks
     for (const [key, reg] of memoryRegistrations.entries()) {
-      if (reg.examId === examId && !candidatesMap.has(reg.candidateId)) {
+      if (reg.examId === examId) {
         candidatesMap.set(reg.candidateId, {
           candidateId: reg.candidateId,
           name: reg.name || 'Student Candidate',
@@ -443,6 +490,42 @@ export const getAssignedStudents = async (req, res) => {
           assignedAt: reg.assignedAt || new Date().toISOString(),
         })
       }
+    }
+
+    // 2. Fetch database ex_exam_registrations
+    const { data: dbRegs } = await supabase
+      .from('ex_exam_registrations')
+      .select('candidate_id, slot_id, slot_start_time, slot_end_time, assigned_at, booked_at')
+      .eq('exam_id', examId)
+
+    if (dbRegs && dbRegs.length > 0) {
+      const candidateIds = dbRegs.map((r) => r.candidate_id).filter(Boolean)
+      let users = []
+      if (candidateIds.length > 0) {
+        const { data: userList } = await supabase
+          .from('ex_users')
+          .select('id, name, email, roll_number')
+          .in('id', candidateIds)
+        users = userList || []
+      }
+
+      const userMap = new Map(users.map((u) => [u.id, u]))
+
+      dbRegs.forEach((r) => {
+        const u = userMap.get(r.candidate_id)
+        const existing = candidatesMap.get(r.candidate_id)
+        candidatesMap.set(r.candidate_id, {
+          candidateId: r.candidate_id,
+          name: u?.name || existing?.name || 'Student Candidate',
+          email: u?.email || existing?.email || '',
+          rollNumber: u?.roll_number || existing?.rollNumber || '',
+          slotId: r.slot_id || existing?.slotId,
+          slotStartTime: r.slot_start_time || existing?.slotStartTime,
+          slotEndTime: r.slot_end_time || existing?.slotEndTime,
+          assignedAt: r.assigned_at || existing?.assignedAt,
+          bookedAt: r.booked_at || existing?.bookedAt,
+        })
+      })
     }
 
     const students = Array.from(candidatesMap.values())
@@ -465,6 +548,7 @@ export const removeAssignedCandidate = async (req, res) => {
 
     const key = `${candidateId}_${examId}`
     memoryRegistrations.delete(key)
+    saveStateToDisk()
 
     res.json({ message: 'Candidate removed from exam successfully' })
   } catch (err) {

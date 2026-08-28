@@ -1,4 +1,4 @@
-﻿-- ==============================================================================
+-- ==============================================================================
 -- EXAM MODULE — COMPLETE SUPABASE SCHEMA (with Sections Support)
 -- Run this in Supabase SQL Editor (drop all tables first, or run on a fresh DB)
 -- ==============================================================================
@@ -53,6 +53,18 @@ CREATE TABLE IF NOT EXISTS public.ex_exam_sections (
     cutoff_marks  NUMERIC(6,2) DEFAULT 0,
     created_at    TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at    TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- ==============================================================================
+-- 3b. EXAM SLOTS Table (ex_exam_slots)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.ex_exam_slots (
+    id          TEXT PRIMARY KEY,
+    exam_id     UUID NOT NULL REFERENCES public.ex_exams(id) ON DELETE CASCADE,
+    start_time  TIMESTAMPTZ NOT NULL,
+    end_time    TIMESTAMPTZ NOT NULL,
+    capacity    INTEGER DEFAULT 30 NOT NULL,
+    created_at  TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- ==============================================================================

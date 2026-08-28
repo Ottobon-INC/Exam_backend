@@ -23,21 +23,39 @@ const normalizeDifficulty = (val) => {
 
 import { supabase } from '../config/db.js'
 
-// Helper: recalculate exam total_marks and pass_marks from all questions
 export const syncExamMarks = async (examId) => {
   if (!examId) return
   try {
-    const { data: questions } = await supabase
-      .from('ex_questions')
-      .select('points')
+    const { data: sections } = await supabase
+      .from('ex_exam_sections')
+      .select('id, max_questions_limit')
       .eq('exam_id', examId)
 
-    const totalMarks = (questions || []).reduce((sum, q) => sum + (Number(q.points) || 0), 0)
-    const passMarks = Math.round(totalMarks * 0.4)
+    const { data: questions } = await supabase
+      .from('ex_questions')
+      .select('section_id, points')
+      .eq('exam_id', examId)
 
+    let totalMarks = 0
+    if (sections && sections.length > 0) {
+      sections.forEach((sec) => {
+        const secQs = (questions || []).filter((q) => q.section_id === sec.id)
+        // Sort descending by points so max possible score from served subset is counted
+        secQs.sort((a, b) => (Number(b.points) || 1) - (Number(a.points) || 1))
+        const limit = Number(sec.max_questions_limit)
+        const count = limit && limit > 0 ? Math.min(secQs.length, limit) : secQs.length
+        totalMarks += secQs.slice(0, count).reduce((sum, q) => sum + (Number(q.points) || 1), 0)
+      })
+      const unsectioned = (questions || []).filter((q) => !q.section_id)
+      totalMarks += unsectioned.reduce((sum, q) => sum + (Number(q.points) || 1), 0)
+    } else {
+      totalMarks = (questions || []).reduce((sum, q) => sum + (Number(q.points) || 1), 0)
+    }
+
+    // Only update total_marks — never touch pass_marks (admin sets that explicitly)
     await supabase
       .from('ex_exams')
-      .update({ total_marks: totalMarks, pass_marks: passMarks })
+      .update({ total_marks: totalMarks })
       .eq('id', examId)
   } catch (err) {
     console.error('Error syncing exam marks:', err)
@@ -70,6 +88,7 @@ export const getAllQuestions = async (req, res) => {
       options: typeof q.options_json === 'string' ? JSON.parse(q.options_json) : (q.options_json || []),
       correctAnswer: q.correct_answer,
       points: q.points,
+      negativePoints: Number(q.negative_points) || 0,
       difficulty: q.difficulty,
     }))
 
@@ -82,7 +101,7 @@ export const getAllQuestions = async (req, res) => {
 
 export const createQuestion = async (req, res) => {
   try {
-    const { examId, sectionId, subject, topic, type, statement, options, correctAnswer, points, difficulty } = req.body
+    const { examId, sectionId, subject, topic, type, statement, options, correctAnswer, difficulty } = req.body
 
     const { data: question, error } = await supabase
       .from('ex_questions')
@@ -95,7 +114,8 @@ export const createQuestion = async (req, res) => {
         statement,
         options_json: options ? JSON.stringify(options) : null,
         correct_answer: String(correctAnswer ?? '0'),
-        points: Number(points) || 2,
+        points: 1,
+        negative_points: 0,
         difficulty: normalizeDifficulty(difficulty),
       })
       .select()
@@ -130,7 +150,8 @@ export const bulkCreateQuestions = async (req, res) => {
       statement: q.statement,
       options_json: q.options ? JSON.stringify(q.options) : null,
       correct_answer: String(q.correctAnswer ?? '0'),
-      points: Number(q.points) || 2,
+      points: 1,
+      negative_points: 0,
       difficulty: normalizeDifficulty(q.difficulty),
     }))
 
@@ -153,10 +174,9 @@ export const bulkCreateQuestions = async (req, res) => {
 export const updateQuestion = async (req, res) => {
   try {
     const { id } = req.params
-    const { options, correctAnswer, points, sectionId, ...rest } = req.body
+    const { options, correctAnswer, sectionId, ...rest } = req.body
 
-    const updateData = { ...rest }
-    if (points !== undefined) updateData.points = Number(points)
+    const updateData = { ...rest, points: 1, negative_points: 0 }
     if (options !== undefined) updateData.options_json = JSON.stringify(options)
     if (correctAnswer !== undefined) updateData.correct_answer = String(correctAnswer)
     if (sectionId !== undefined) updateData.section_id = sectionId || null
@@ -195,3 +215,29 @@ export const deleteQuestion = async (req, res) => {
     res.status(500).json({ error: error.message || 'Failed to delete question' })
   }
 }
+
+export const batchUpdateQuestionMarks = async (req, res) => {
+  try {
+    const { examId, sectionId } = req.body
+
+    if (!examId) return res.status(400).json({ error: 'examId is required' })
+
+    const updateData = { points: 1, negative_points: 0 }
+
+    let query = supabase.from('ex_questions').update(updateData).eq('exam_id', examId)
+    if (sectionId && sectionId !== 'ALL') {
+      query = query.eq('section_id', sectionId)
+    }
+
+    const { data, error } = await query.select()
+    if (error) throw error
+
+    await syncExamMarks(examId)
+
+    res.json({ message: `Successfully updated marks for ${data ? data.length : 0} questions`, count: data ? data.length : 0 })
+  } catch (err) {
+    console.error('Error batch updating question marks:', err)
+    res.status(500).json({ error: err.message || 'Failed to update marks' })
+  }
+}
+

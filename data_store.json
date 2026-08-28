@@ -1,0 +1,999 @@
+{
+  "slots": {
+    "b794958b-9fa2-40e3-a9de-d345a70884dd": [
+      {
+        "id": "slot_1787828287384_wloid",
+        "examId": "b794958b-9fa2-40e3-a9de-d345a70884dd",
+        "exam_id": "b794958b-9fa2-40e3-a9de-d345a70884dd",
+        "startTime": "2026-08-27T15:01",
+        "start_time": "2026-08-27T15:01",
+        "endTime": "2026-08-27T16:01",
+        "end_time": "2026-08-27T16:01",
+        "capacity": 30
+      }
+    ],
+    "9a8f2fa0-8992-4033-812a-7f11b32325bb": [
+      {
+        "id": "slot_1787830090646_2fl2x",
+        "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+        "exam_id": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+        "startTime": "2026-08-27T10:30",
+        "start_time": "2026-08-27T10:30",
+        "endTime": "2026-08-27T11:30",
+        "end_time": "2026-08-27T11:30",
+        "capacity": 30
+      },
+      {
+        "id": "slot_1787830090962_tbh9w",
+        "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+        "exam_id": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+        "startTime": "2026-08-27T11:30",
+        "start_time": "2026-08-27T11:30",
+        "endTime": "2026-08-27T12:30",
+        "end_time": "2026-08-27T12:30",
+        "capacity": 30
+      }
+    ]
+  },
+  "registrations": {
+    "632cec17-bb16-4d01-b515-a40f612b106d_b794958b-9fa2-40e3-a9de-d345a70884dd": {
+      "candidateId": "632cec17-bb16-4d01-b515-a40f612b106d",
+      "examId": "b794958b-9fa2-40e3-a9de-d345a70884dd",
+      "slotId": "slot_1787828287384_wloid",
+      "startTime": "2026-08-27T15:01",
+      "endTime": "2026-08-27T16:01",
+      "bookedAt": "2026-08-27T10:58:28.455Z"
+    },
+    "632cec17-bb16-4d01-b515-a40f612b106d_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "632cec17-bb16-4d01-b515-a40f612b106d",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": "slot_1787830090646_2fl2x",
+      "startTime": "2026-08-27T10:30",
+      "endTime": "2026-08-27T11:30",
+      "bookedAt": "2026-08-27T11:28:41.246Z"
+    },
+    "273ec9aa-67e3-430e-87ed-dfca703e545d_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "273ec9aa-67e3-430e-87ed-dfca703e545d",
+      "name": "Vivaan Sharma",
+      "email": "vivaan.sharma2@example.com",
+      "rollNumber": "9000000001",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:33.513Z"
+    },
+    "b358b8e9-4cf1-4384-9f55-796d057ed5e5_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "b358b8e9-4cf1-4384-9f55-796d057ed5e5",
+      "name": "Aditya Reddy",
+      "email": "aditya.reddy3@example.com",
+      "rollNumber": "9000000002",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:33.759Z"
+    },
+    "86f4ed27-5c43-4ca8-8299-4de77b13f22b_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "86f4ed27-5c43-4ca8-8299-4de77b13f22b",
+      "name": "Arjun Naidu",
+      "email": "arjun.naidu4@example.com",
+      "rollNumber": "9000000003",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:34.084Z"
+    },
+    "e2e0f46d-b819-4495-821a-ad31497bec11_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "e2e0f46d-b819-4495-821a-ad31497bec11",
+      "name": "Sai Rao",
+      "email": "sai.rao5@example.com",
+      "rollNumber": "9000000004",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:34.337Z"
+    },
+    "cbb2e00b-3690-4420-8c6d-160b2a23ddac_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "cbb2e00b-3690-4420-8c6d-160b2a23ddac",
+      "name": "Karthik Varma",
+      "email": "karthik.varma6@example.com",
+      "rollNumber": "9000000005",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:34.652Z"
+    },
+    "6e48bdc4-2a6a-46ec-a8f7-c461094d81bc_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "6e48bdc4-2a6a-46ec-a8f7-c461094d81bc",
+      "name": "Rohan Gupta",
+      "email": "rohan.gupta7@example.com",
+      "rollNumber": "9000000006",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:34.894Z"
+    },
+    "4148e664-293e-43ba-acd2-d424557a13ea_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "4148e664-293e-43ba-acd2-d424557a13ea",
+      "name": "Rahul Patel",
+      "email": "rahul.patel8@example.com",
+      "rollNumber": "9000000007",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:35.157Z"
+    },
+    "04374f0f-6a80-43be-a700-5f27b7cf98fd_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "04374f0f-6a80-43be-a700-5f27b7cf98fd",
+      "name": "Varun Verma",
+      "email": "varun.verma9@example.com",
+      "rollNumber": "9000000008",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:35.405Z"
+    },
+    "d3b75c60-c1fb-4e98-817a-2d14397e98c6_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "d3b75c60-c1fb-4e98-817a-2d14397e98c6",
+      "name": "Nikhil Singh",
+      "email": "nikhil.singh10@example.com",
+      "rollNumber": "9000000009",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:35.699Z"
+    },
+    "e155b531-4d06-43e8-ba5b-ea9d90aef6ee_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "e155b531-4d06-43e8-ba5b-ea9d90aef6ee",
+      "name": "Ananya Rao",
+      "email": "ananya.rao11@example.com",
+      "rollNumber": "9000000010",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:35.978Z"
+    },
+    "c9d2a054-6aa7-435e-ba50-373ea9deb6e3_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "c9d2a054-6aa7-435e-ba50-373ea9deb6e3",
+      "name": "Priya Reddy",
+      "email": "priya.reddy12@example.com",
+      "rollNumber": "9000000011",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:36.435Z"
+    },
+    "1a1fe546-ca2d-41e4-b476-f612f638d15b_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "1a1fe546-ca2d-41e4-b476-f612f638d15b",
+      "name": "Saanvi Naidu",
+      "email": "saanvi.naidu13@example.com",
+      "rollNumber": "9000000012",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:36.700Z"
+    },
+    "19614465-f93d-430b-bcf0-4119d839ee5d_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "19614465-f93d-430b-bcf0-4119d839ee5d",
+      "name": "Kavya Devi",
+      "email": "kavya.devi14@example.com",
+      "rollNumber": "9000000013",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:37.158Z"
+    },
+    "36a2df01-2e9d-43be-be5f-1896364f9c76_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "36a2df01-2e9d-43be-be5f-1896364f9c76",
+      "name": "Sneha Rani",
+      "email": "sneha.rani15@example.com",
+      "rollNumber": "9000000014",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:37.418Z"
+    },
+    "bea1ebaa-250b-4957-9473-afd4353c20f8_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "bea1ebaa-250b-4957-9473-afd4353c20f8",
+      "name": "Divya Kumari",
+      "email": "divya.kumari16@example.com",
+      "rollNumber": "9000000015",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:37.727Z"
+    },
+    "98fd2ddf-1a44-4b95-af1d-297284526160_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "98fd2ddf-1a44-4b95-af1d-297284526160",
+      "name": "Keerthi Sharma",
+      "email": "keerthi.sharma17@example.com",
+      "rollNumber": "9000000016",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:37.974Z"
+    },
+    "4f24594e-bd87-4666-8f23-0a66357fe4c7_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "4f24594e-bd87-4666-8f23-0a66357fe4c7",
+      "name": "Harika Reddy",
+      "email": "harika.reddy18@example.com",
+      "rollNumber": "9000000017",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:38.256Z"
+    },
+    "7ecdef63-b3b2-446e-94b4-4324f0eeaf20_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "7ecdef63-b3b2-446e-94b4-4324f0eeaf20",
+      "name": "Siri Rao",
+      "email": "siri.rao19@example.com",
+      "rollNumber": "9000000018",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:38.485Z"
+    },
+    "0b21ef98-218e-48d0-83f1-9cc1e1373660_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "0b21ef98-218e-48d0-83f1-9cc1e1373660",
+      "name": "Anjali Naidu",
+      "email": "anjali.naidu20@example.com",
+      "rollNumber": "9000000019",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:38.754Z"
+    },
+    "dc15e090-a73d-46d8-b668-0e8706ff3a84_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "dc15e090-a73d-46d8-b668-0e8706ff3a84",
+      "name": "Teja Reddy",
+      "email": "teja.reddy21@example.com",
+      "rollNumber": "9000000020",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:39.064Z"
+    },
+    "f43ca18a-5610-45c7-a9bf-b27ab7371ddb_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "f43ca18a-5610-45c7-a9bf-b27ab7371ddb",
+      "name": "Manasa Rao",
+      "email": "manasa.rao22@example.com",
+      "rollNumber": "9000000021",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:39.282Z"
+    },
+    "c1b57ad6-7f2c-4829-bfd7-8698a5d413f6_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "c1b57ad6-7f2c-4829-bfd7-8698a5d413f6",
+      "name": "Vishnu Naidu",
+      "email": "vishnu.naidu23@example.com",
+      "rollNumber": "9000000022",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:39.557Z"
+    },
+    "c56b835b-c271-4fd6-ac5c-d8c5f7fd19b4_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "c56b835b-c271-4fd6-ac5c-d8c5f7fd19b4",
+      "name": "Srinivas Kumar",
+      "email": "srinivas.kumar24@example.com",
+      "rollNumber": "9000000023",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:39.826Z"
+    },
+    "28c0150b-9f49-4763-9465-3dc835807192_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "28c0150b-9f49-4763-9465-3dc835807192",
+      "name": "Harsha Varma",
+      "email": "harsha.varma25@example.com",
+      "rollNumber": "9000000024",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:40.040Z"
+    },
+    "0edf43f5-9ece-4ae0-a3b2-459d0455228c_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "0edf43f5-9ece-4ae0-a3b2-459d0455228c",
+      "name": "Charan Reddy",
+      "email": "charan.reddy26@example.com",
+      "rollNumber": "9000000025",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:40.502Z"
+    },
+    "db856e4c-aa3b-4289-a854-3138db533c6a_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "db856e4c-aa3b-4289-a854-3138db533c6a",
+      "name": "Lokesh Rao",
+      "email": "lokesh.rao27@example.com",
+      "rollNumber": "9000000026",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:41.021Z"
+    },
+    "c7369392-4f0f-4854-bcdd-47d254f859c6_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "c7369392-4f0f-4854-bcdd-47d254f859c6",
+      "name": "Pranav Naidu",
+      "email": "pranav.naidu28@example.com",
+      "rollNumber": "9000000027",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:41.280Z"
+    },
+    "ed44901c-518d-4e7b-8c74-396aa9a1328c_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "ed44901c-518d-4e7b-8c74-396aa9a1328c",
+      "name": "Akash Kumar",
+      "email": "akash.kumar29@example.com",
+      "rollNumber": "9000000028",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:41.497Z"
+    },
+    "cacbb641-5073-4e19-b7ee-4625e89bd18b_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "cacbb641-5073-4e19-b7ee-4625e89bd18b",
+      "name": "Sandeep Varma",
+      "email": "sandeep.varma30@example.com",
+      "rollNumber": "9000000029",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:41.755Z"
+    },
+    "e0ddcd4a-8b25-4ccd-9936-f5f283903f3d_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "e0ddcd4a-8b25-4ccd-9936-f5f283903f3d",
+      "name": "Nandini Sharma",
+      "email": "nandini.sharma31@example.com",
+      "rollNumber": "9000000030",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:42.147Z"
+    },
+    "12ef192e-002c-4a81-8d37-95713af9baab_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "12ef192e-002c-4a81-8d37-95713af9baab",
+      "name": "Swathi Reddy",
+      "email": "swathi.reddy32@example.com",
+      "rollNumber": "9000000031",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:42.664Z"
+    },
+    "5b100504-8710-4439-ac48-0f69ef98ce26_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "5b100504-8710-4439-ac48-0f69ef98ce26",
+      "name": "Lakshmi Naidu",
+      "email": "lakshmi.naidu33@example.com",
+      "rollNumber": "9000000032",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:43.072Z"
+    },
+    "de2843c2-9004-450e-bf6e-e9c69dc3aaa3_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "de2843c2-9004-450e-bf6e-e9c69dc3aaa3",
+      "name": "Deepika Devi",
+      "email": "deepika.devi34@example.com",
+      "rollNumber": "9000000033",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:43.452Z"
+    },
+    "4da83f2b-29a5-4bee-bfab-b2410594f41c_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "4da83f2b-29a5-4bee-bfab-b2410594f41c",
+      "name": "Bhavya Rani",
+      "email": "bhavya.rani35@example.com",
+      "rollNumber": "9000000034",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:43.794Z"
+    },
+    "d6c711c5-6966-441d-97e9-a64df3f096d3_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "d6c711c5-6966-441d-97e9-a64df3f096d3",
+      "name": "Pooja Kumari",
+      "email": "pooja.kumari36@example.com",
+      "rollNumber": "9000000035",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:44.203Z"
+    },
+    "edd626e6-bc95-46a7-b24e-e34185dbf1fe_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "edd626e6-bc95-46a7-b24e-e34185dbf1fe",
+      "name": "Ritika Rao",
+      "email": "ritika.rao37@example.com",
+      "rollNumber": "9000000036",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:44.451Z"
+    },
+    "d4055786-d8c7-481c-ac42-65c2308f52dc_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "d4055786-d8c7-481c-ac42-65c2308f52dc",
+      "name": "Meghana Reddy",
+      "email": "meghana.reddy38@example.com",
+      "rollNumber": "9000000037",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:44.816Z"
+    },
+    "6136893c-8dae-4435-90ef-fb4dea1fc90b_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "6136893c-8dae-4435-90ef-fb4dea1fc90b",
+      "name": "Sowmya Naidu",
+      "email": "sowmya.naidu39@example.com",
+      "rollNumber": "9000000038",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:45.127Z"
+    },
+    "800ff5b4-52dc-4b02-9d90-bd21e42106bb_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "800ff5b4-52dc-4b02-9d90-bd21e42106bb",
+      "name": "Aishwarya Varma",
+      "email": "aishwarya.varma40@example.com",
+      "rollNumber": "9000000039",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:45.437Z"
+    },
+    "b54e2229-2836-498f-a9a0-4306d8d93e53_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "b54e2229-2836-498f-a9a0-4306d8d93e53",
+      "name": "Krishna Reddy",
+      "email": "krishna.reddy41@example.com",
+      "rollNumber": "9000000040",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:45.683Z"
+    },
+    "16710fb7-0edc-4269-971c-32a0c7abddae_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "16710fb7-0edc-4269-971c-32a0c7abddae",
+      "name": "Venkatesh Rao",
+      "email": "venkatesh.rao42@example.com",
+      "rollNumber": "9000000041",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:45.972Z"
+    },
+    "86aa7e8f-e4db-4124-b4f2-30beaa34ab0b_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "86aa7e8f-e4db-4124-b4f2-30beaa34ab0b",
+      "name": "Rakesh Naidu",
+      "email": "rakesh.naidu43@example.com",
+      "rollNumber": "9000000042",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:46.205Z"
+    },
+    "678f7356-55db-4b01-96d7-797c53f239d0_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "678f7356-55db-4b01-96d7-797c53f239d0",
+      "name": "Mahesh Kumar",
+      "email": "mahesh.kumar44@example.com",
+      "rollNumber": "9000000043",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:46.464Z"
+    },
+    "63d44327-0860-4975-b340-f3a2acca4ab6_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "63d44327-0860-4975-b340-f3a2acca4ab6",
+      "name": "Ravi Varma",
+      "email": "ravi.varma45@example.com",
+      "rollNumber": "9000000044",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:46.704Z"
+    },
+    "d3cd9a92-f649-44f5-bedb-86a59b8c4235_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "d3cd9a92-f649-44f5-bedb-86a59b8c4235",
+      "name": "Surya Reddy",
+      "email": "surya.reddy46@example.com",
+      "rollNumber": "9000000045",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:46.930Z"
+    },
+    "f5aa560d-ab64-4892-973a-2f582af9d004_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "f5aa560d-ab64-4892-973a-2f582af9d004",
+      "name": "Naveen Rao",
+      "email": "naveen.rao47@example.com",
+      "rollNumber": "9000000046",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:47.228Z"
+    },
+    "54c98ee9-c0b3-4b41-9e91-f5ecf41dd1de_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "54c98ee9-c0b3-4b41-9e91-f5ecf41dd1de",
+      "name": "Manoj Naidu",
+      "email": "manoj.naidu48@example.com",
+      "rollNumber": "9000000047",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:47.492Z"
+    },
+    "1eac6bbb-528e-4359-82c7-48a876c71ebf_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "1eac6bbb-528e-4359-82c7-48a876c71ebf",
+      "name": "Gopi Kumar",
+      "email": "gopi.kumar49@example.com",
+      "rollNumber": "9000000048",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:47.707Z"
+    },
+    "38303699-f946-4ba9-91ae-1143db046530_9a8f2fa0-8992-4033-812a-7f11b32325bb": {
+      "candidateId": "38303699-f946-4ba9-91ae-1143db046530",
+      "name": "Sanjay Varma",
+      "email": "sanjay.varma50@example.com",
+      "rollNumber": "9000000049",
+      "examId": "9a8f2fa0-8992-4033-812a-7f11b32325bb",
+      "slotId": null,
+      "assignedAt": "2026-08-27T11:27:47.923Z"
+    }
+  },
+  "users": {
+    "aarav.kumar1@example.com": {
+      "id": "632cec17-bb16-4d01-b515-a40f612b106d",
+      "email": "aarav.kumar1@example.com",
+      "name": "Aarav Kumar",
+      "password_hash": "$2a$10$P8qeNW5QUZE2FOuyJTyzR.KQrJyD0D4uS9DOet94Xw2Q.4.kOkBbm",
+      "role": "CANDIDATE",
+      "roll_number": "9000000000",
+      "created_at": "2026-08-27T09:54:38.286615+00:00",
+      "updated_at": "2026-08-27T09:54:38.286615+00:00"
+    },
+    "vivaan.sharma2@example.com": {
+      "id": "273ec9aa-67e3-430e-87ed-dfca703e545d",
+      "email": "vivaan.sharma2@example.com",
+      "name": "Vivaan Sharma",
+      "password_hash": "$2a$10$qhflkV7Yx3B7TYmuHn0JrujN3/fVj6Z8RxIgOy8BWDEUu1QgBigw2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000001",
+      "created_at": "2026-08-27T09:54:38.621964+00:00",
+      "updated_at": "2026-08-27T09:54:38.621964+00:00"
+    },
+    "aditya.reddy3@example.com": {
+      "id": "b358b8e9-4cf1-4384-9f55-796d057ed5e5",
+      "email": "aditya.reddy3@example.com",
+      "name": "Aditya Reddy",
+      "password_hash": "$2a$10$sTDbhD15AfGSjgxYGVrvr.Q4WNrnI5B85ihZDlY6I9YpI8pVGS.dW",
+      "role": "CANDIDATE",
+      "roll_number": "9000000002",
+      "created_at": "2026-08-27T09:54:39.061608+00:00",
+      "updated_at": "2026-08-27T09:54:39.061608+00:00"
+    },
+    "arjun.naidu4@example.com": {
+      "id": "86f4ed27-5c43-4ca8-8299-4de77b13f22b",
+      "email": "arjun.naidu4@example.com",
+      "name": "Arjun Naidu",
+      "password_hash": "$2a$10$i5QkHePQrqElnu7JB9GW8e493gPtSOEWKLCgyBs0HuMuaEmnL2FHG",
+      "role": "CANDIDATE",
+      "roll_number": "9000000003",
+      "created_at": "2026-08-27T09:54:39.417165+00:00",
+      "updated_at": "2026-08-27T09:54:39.417165+00:00"
+    },
+    "sai.rao5@example.com": {
+      "id": "e2e0f46d-b819-4495-821a-ad31497bec11",
+      "email": "sai.rao5@example.com",
+      "name": "Sai Rao",
+      "password_hash": "$2a$10$MJjP8D1EYmXtziyjwtvXy.xcrjQS67brzuo1UC5UC7t1j1LaPAIv6",
+      "role": "CANDIDATE",
+      "roll_number": "9000000004",
+      "created_at": "2026-08-27T09:54:39.77187+00:00",
+      "updated_at": "2026-08-27T09:54:39.77187+00:00"
+    },
+    "karthik.varma6@example.com": {
+      "id": "cbb2e00b-3690-4420-8c6d-160b2a23ddac",
+      "email": "karthik.varma6@example.com",
+      "name": "Karthik Varma",
+      "password_hash": "$2a$10$KGLcVgy1wj5xU1cBSdkqguzmq8M7s8dHauegBoflp0gJmEGC3MM0O",
+      "role": "CANDIDATE",
+      "roll_number": "9000000005",
+      "created_at": "2026-08-27T09:54:40.207292+00:00",
+      "updated_at": "2026-08-27T09:54:40.207292+00:00"
+    },
+    "rohan.gupta7@example.com": {
+      "id": "6e48bdc4-2a6a-46ec-a8f7-c461094d81bc",
+      "email": "rohan.gupta7@example.com",
+      "name": "Rohan Gupta",
+      "password_hash": "$2a$10$rKydyIUUdxM3Ccm11WCtcOVYAVzVm58BH1mGKaUT/3wfrT6Hgr3XG",
+      "role": "CANDIDATE",
+      "roll_number": "9000000006",
+      "created_at": "2026-08-27T09:54:40.550997+00:00",
+      "updated_at": "2026-08-27T09:54:40.550997+00:00"
+    },
+    "rahul.patel8@example.com": {
+      "id": "4148e664-293e-43ba-acd2-d424557a13ea",
+      "email": "rahul.patel8@example.com",
+      "name": "Rahul Patel",
+      "password_hash": "$2a$10$Nc0FNiHKF7hOgPq02oS2CuuJiRiCqG/4.TZoT2tiFaE6XwxsRPLfK",
+      "role": "CANDIDATE",
+      "roll_number": "9000000007",
+      "created_at": "2026-08-27T09:54:41.363428+00:00",
+      "updated_at": "2026-08-27T09:54:41.363428+00:00"
+    },
+    "varun.verma9@example.com": {
+      "id": "04374f0f-6a80-43be-a700-5f27b7cf98fd",
+      "email": "varun.verma9@example.com",
+      "name": "Varun Verma",
+      "password_hash": "$2a$10$ci715KQR42LKNpSxjCbVq.tFhxeRjCV0oUEnq.DpHx0gAbYvnKyKW",
+      "role": "CANDIDATE",
+      "roll_number": "9000000008",
+      "created_at": "2026-08-27T09:54:41.99199+00:00",
+      "updated_at": "2026-08-27T09:54:41.99199+00:00"
+    },
+    "nikhil.singh10@example.com": {
+      "id": "d3b75c60-c1fb-4e98-817a-2d14397e98c6",
+      "email": "nikhil.singh10@example.com",
+      "name": "Nikhil Singh",
+      "password_hash": "$2a$10$3M2vWJtdSNIKO5kP4t.OnO35erPb1idfg659vYs9xAv3RQAmOc1fq",
+      "role": "CANDIDATE",
+      "roll_number": "9000000009",
+      "created_at": "2026-08-27T09:54:42.5655+00:00",
+      "updated_at": "2026-08-27T09:54:42.5655+00:00"
+    },
+    "ananya.rao11@example.com": {
+      "id": "e155b531-4d06-43e8-ba5b-ea9d90aef6ee",
+      "email": "ananya.rao11@example.com",
+      "name": "Ananya Rao",
+      "password_hash": "$2a$10$lSrBzX0UEe6eU5J0H4pKFO9Pe/GrX6.WtK4483quDakIVm7TP/fZ.",
+      "role": "CANDIDATE",
+      "roll_number": "9000000010",
+      "created_at": "2026-08-27T09:54:43.78189+00:00",
+      "updated_at": "2026-08-27T09:54:43.78189+00:00"
+    },
+    "priya.reddy12@example.com": {
+      "id": "c9d2a054-6aa7-435e-ba50-373ea9deb6e3",
+      "email": "priya.reddy12@example.com",
+      "name": "Priya Reddy",
+      "password_hash": "$2a$10$/.cejKIamqhJiDorJzef0OnNt9v51puWERJy/xs460HDhcVsPZkMe",
+      "role": "CANDIDATE",
+      "roll_number": "9000000011",
+      "created_at": "2026-08-27T09:54:44.318734+00:00",
+      "updated_at": "2026-08-27T09:54:44.318734+00:00"
+    },
+    "saanvi.naidu13@example.com": {
+      "id": "1a1fe546-ca2d-41e4-b476-f612f638d15b",
+      "email": "saanvi.naidu13@example.com",
+      "name": "Saanvi Naidu",
+      "password_hash": "$2a$10$Iq9u6/iKy2HNW6t3t/tf8Orq6DxM7vwkn7B0H.Dg5dzFRI2rYlVS6",
+      "role": "CANDIDATE",
+      "roll_number": "9000000012",
+      "created_at": "2026-08-27T09:54:45.162245+00:00",
+      "updated_at": "2026-08-27T09:54:45.162245+00:00"
+    },
+    "kavya.devi14@example.com": {
+      "id": "19614465-f93d-430b-bcf0-4119d839ee5d",
+      "email": "kavya.devi14@example.com",
+      "name": "Kavya Devi",
+      "password_hash": "$2a$10$LDn5il.4PAO4fH0t4ej2xuD0jX36PSUOPMzEh.xgiuz/AZu1AhvYm",
+      "role": "CANDIDATE",
+      "roll_number": "9000000013",
+      "created_at": "2026-08-27T09:54:45.529985+00:00",
+      "updated_at": "2026-08-27T09:54:45.529985+00:00"
+    },
+    "sneha.rani15@example.com": {
+      "id": "36a2df01-2e9d-43be-be5f-1896364f9c76",
+      "email": "sneha.rani15@example.com",
+      "name": "Sneha Rani",
+      "password_hash": "$2a$10$xCmr1E.hRJXEtbyLJ/QRFuPxe.MPrztAgCK6e36yw/Scmz0GuPaIS",
+      "role": "CANDIDATE",
+      "roll_number": "9000000014",
+      "created_at": "2026-08-27T09:54:45.891535+00:00",
+      "updated_at": "2026-08-27T09:54:45.891535+00:00"
+    },
+    "divya.kumari16@example.com": {
+      "id": "bea1ebaa-250b-4957-9473-afd4353c20f8",
+      "email": "divya.kumari16@example.com",
+      "name": "Divya Kumari",
+      "password_hash": "$2a$10$w1fiULNRUfFN9EN7aKffR.fQMNFRIsAdeoOYthpIg6OtVxxqouQUu",
+      "role": "CANDIDATE",
+      "roll_number": "9000000015",
+      "created_at": "2026-08-27T09:54:46.247268+00:00",
+      "updated_at": "2026-08-27T09:54:46.247268+00:00"
+    },
+    "keerthi.sharma17@example.com": {
+      "id": "98fd2ddf-1a44-4b95-af1d-297284526160",
+      "email": "keerthi.sharma17@example.com",
+      "name": "Keerthi Sharma",
+      "password_hash": "$2a$10$mDj9N3dphivVq/6DMDDd6.B5dVEz65id/hu/k2dMh5C8fTPhkbStG",
+      "role": "CANDIDATE",
+      "roll_number": "9000000016",
+      "created_at": "2026-08-27T09:54:46.618906+00:00",
+      "updated_at": "2026-08-27T09:54:46.618906+00:00"
+    },
+    "harika.reddy18@example.com": {
+      "id": "4f24594e-bd87-4666-8f23-0a66357fe4c7",
+      "email": "harika.reddy18@example.com",
+      "name": "Harika Reddy",
+      "password_hash": "$2a$10$Pdx0.RxhbpWdTiilpvt8l.oSNhUvI7xJy4XhSLIkTFxfEpV.UNpna",
+      "role": "CANDIDATE",
+      "roll_number": "9000000017",
+      "created_at": "2026-08-27T09:54:46.972456+00:00",
+      "updated_at": "2026-08-27T09:54:46.972456+00:00"
+    },
+    "siri.rao19@example.com": {
+      "id": "7ecdef63-b3b2-446e-94b4-4324f0eeaf20",
+      "email": "siri.rao19@example.com",
+      "name": "Siri Rao",
+      "password_hash": "$2a$10$ElFSXebv45q.nc1TPIdUzuTcAg.4my5HYgz6MBuAbYAvijnWCbGaS",
+      "role": "CANDIDATE",
+      "roll_number": "9000000018",
+      "created_at": "2026-08-27T09:54:47.380043+00:00",
+      "updated_at": "2026-08-27T09:54:47.380043+00:00"
+    },
+    "anjali.naidu20@example.com": {
+      "id": "0b21ef98-218e-48d0-83f1-9cc1e1373660",
+      "email": "anjali.naidu20@example.com",
+      "name": "Anjali Naidu",
+      "password_hash": "$2a$10$HR3gqqKX1A31vIHwZv7lrexJKeVVMTLpOre60DB2pycWlZTyuMqn2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000019",
+      "created_at": "2026-08-27T09:54:47.722563+00:00",
+      "updated_at": "2026-08-27T09:54:47.722563+00:00"
+    },
+    "teja.reddy21@example.com": {
+      "id": "dc15e090-a73d-46d8-b668-0e8706ff3a84",
+      "email": "teja.reddy21@example.com",
+      "name": "Teja Reddy",
+      "password_hash": "$2a$10$JyaUXGzn1W64A9yvrJ3N1OjGOCojKuo7ABNZ3tHHOqirE4Pi2i4Y6",
+      "role": "CANDIDATE",
+      "roll_number": "9000000020",
+      "created_at": "2026-08-27T09:54:48.101832+00:00",
+      "updated_at": "2026-08-27T09:54:48.101832+00:00"
+    },
+    "manasa.rao22@example.com": {
+      "id": "f43ca18a-5610-45c7-a9bf-b27ab7371ddb",
+      "email": "manasa.rao22@example.com",
+      "name": "Manasa Rao",
+      "password_hash": "$2a$10$dS2LACE.UqG1OHFIyZpp9.x1l8zFBT6RvCLSGvhXYalQyH876S1/S",
+      "role": "CANDIDATE",
+      "roll_number": "9000000021",
+      "created_at": "2026-08-27T09:54:48.427657+00:00",
+      "updated_at": "2026-08-27T09:54:48.427657+00:00"
+    },
+    "vishnu.naidu23@example.com": {
+      "id": "c1b57ad6-7f2c-4829-bfd7-8698a5d413f6",
+      "email": "vishnu.naidu23@example.com",
+      "name": "Vishnu Naidu",
+      "password_hash": "$2a$10$gGVLd6ciM1HdBtZ/kf76x.jRJDVGMD5PAaNflLvFSs4idmvNOBEa2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000022",
+      "created_at": "2026-08-27T09:54:48.921598+00:00",
+      "updated_at": "2026-08-27T09:54:48.921598+00:00"
+    },
+    "srinivas.kumar24@example.com": {
+      "id": "c56b835b-c271-4fd6-ac5c-d8c5f7fd19b4",
+      "email": "srinivas.kumar24@example.com",
+      "name": "Srinivas Kumar",
+      "password_hash": "$2a$10$co8I37pC9LMq4LI8zUGh.OeAO3UyBCAmuj1E7uhoLzAte3FX7ILii",
+      "role": "CANDIDATE",
+      "roll_number": "9000000023",
+      "created_at": "2026-08-27T09:54:49.429345+00:00",
+      "updated_at": "2026-08-27T09:54:49.429345+00:00"
+    },
+    "harsha.varma25@example.com": {
+      "id": "28c0150b-9f49-4763-9465-3dc835807192",
+      "email": "harsha.varma25@example.com",
+      "name": "Harsha Varma",
+      "password_hash": "$2a$10$5DwojWbsN0j9VOhaAizmMObcaxTyJSc6axLQKxe4O0rrIylNQk//W",
+      "role": "CANDIDATE",
+      "roll_number": "9000000024",
+      "created_at": "2026-08-27T09:54:49.74946+00:00",
+      "updated_at": "2026-08-27T09:54:49.74946+00:00"
+    },
+    "charan.reddy26@example.com": {
+      "id": "0edf43f5-9ece-4ae0-a3b2-459d0455228c",
+      "email": "charan.reddy26@example.com",
+      "name": "Charan Reddy",
+      "password_hash": "$2a$10$hu/oQhhSKO7.YPlxpNzgP.kMxsQCuQa6C6WY5rr6Gcu1NoHp8G1Ku",
+      "role": "CANDIDATE",
+      "roll_number": "9000000025",
+      "created_at": "2026-08-27T09:54:50.185436+00:00",
+      "updated_at": "2026-08-27T09:54:50.185436+00:00"
+    },
+    "lokesh.rao27@example.com": {
+      "id": "db856e4c-aa3b-4289-a854-3138db533c6a",
+      "email": "lokesh.rao27@example.com",
+      "name": "Lokesh Rao",
+      "password_hash": "$2a$10$mfoUm0rZKMTpJlxIVMIFheDlG0MSje77qdoCUHGzBGTPjs2aGlutq",
+      "role": "CANDIDATE",
+      "roll_number": "9000000026",
+      "created_at": "2026-08-27T09:54:50.66959+00:00",
+      "updated_at": "2026-08-27T09:54:50.66959+00:00"
+    },
+    "pranav.naidu28@example.com": {
+      "id": "c7369392-4f0f-4854-bcdd-47d254f859c6",
+      "email": "pranav.naidu28@example.com",
+      "name": "Pranav Naidu",
+      "password_hash": "$2a$10$.n60wBKBdoe12iksu1k0V.wDoo/UzjuCXiVEVAvVlYN8N378sMaAy",
+      "role": "CANDIDATE",
+      "roll_number": "9000000027",
+      "created_at": "2026-08-27T09:54:51.087961+00:00",
+      "updated_at": "2026-08-27T09:54:51.087961+00:00"
+    },
+    "akash.kumar29@example.com": {
+      "id": "ed44901c-518d-4e7b-8c74-396aa9a1328c",
+      "email": "akash.kumar29@example.com",
+      "name": "Akash Kumar",
+      "password_hash": "$2a$10$CHm34fESPC5c8JCCGEMHk.Yd6kE06ZM/bNrgNDgQ9SsV0BWu49BLa",
+      "role": "CANDIDATE",
+      "roll_number": "9000000028",
+      "created_at": "2026-08-27T09:54:51.503006+00:00",
+      "updated_at": "2026-08-27T09:54:51.503006+00:00"
+    },
+    "sandeep.varma30@example.com": {
+      "id": "cacbb641-5073-4e19-b7ee-4625e89bd18b",
+      "email": "sandeep.varma30@example.com",
+      "name": "Sandeep Varma",
+      "password_hash": "$2a$10$PfYi9XnMq6CurusRJSf2UuWSNiAjO21r3Wj3aN2cNESZhM/ys6uHS",
+      "role": "CANDIDATE",
+      "roll_number": "9000000029",
+      "created_at": "2026-08-27T09:54:52.107434+00:00",
+      "updated_at": "2026-08-27T09:54:52.107434+00:00"
+    },
+    "nandini.sharma31@example.com": {
+      "id": "e0ddcd4a-8b25-4ccd-9936-f5f283903f3d",
+      "email": "nandini.sharma31@example.com",
+      "name": "Nandini Sharma",
+      "password_hash": "$2a$10$C9Ply/P/BrOfs1OspwasEucZyUXYbT82PHg9BV6GfcpefEJ5VV.o2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000030",
+      "created_at": "2026-08-27T09:54:52.526936+00:00",
+      "updated_at": "2026-08-27T09:54:52.526936+00:00"
+    },
+    "swathi.reddy32@example.com": {
+      "id": "12ef192e-002c-4a81-8d37-95713af9baab",
+      "email": "swathi.reddy32@example.com",
+      "name": "Swathi Reddy",
+      "password_hash": "$2a$10$c2Z9lCUUxaz49NcPCbgXFu2bf4/pBxBQjhgWQsc1Ns9KA7NKBiHNS",
+      "role": "CANDIDATE",
+      "roll_number": "9000000031",
+      "created_at": "2026-08-27T09:54:52.873932+00:00",
+      "updated_at": "2026-08-27T09:54:52.873932+00:00"
+    },
+    "lakshmi.naidu33@example.com": {
+      "id": "5b100504-8710-4439-ac48-0f69ef98ce26",
+      "email": "lakshmi.naidu33@example.com",
+      "name": "Lakshmi Naidu",
+      "password_hash": "$2a$10$t/wImqdeiDbLxrwmksnFQedQ/8PTsULa857YrFFxWiLogoPWH3.ra",
+      "role": "CANDIDATE",
+      "roll_number": "9000000032",
+      "created_at": "2026-08-27T09:54:53.262188+00:00",
+      "updated_at": "2026-08-27T09:54:53.262188+00:00"
+    },
+    "deepika.devi34@example.com": {
+      "id": "de2843c2-9004-450e-bf6e-e9c69dc3aaa3",
+      "email": "deepika.devi34@example.com",
+      "name": "Deepika Devi",
+      "password_hash": "$2a$10$TwcfEOFKJEQVLcUn5mKsD.AtdUl7i/v7rchWWY/s71U9zeN4nJ2zm",
+      "role": "CANDIDATE",
+      "roll_number": "9000000033",
+      "created_at": "2026-08-27T09:54:53.610129+00:00",
+      "updated_at": "2026-08-27T09:54:53.610129+00:00"
+    },
+    "bhavya.rani35@example.com": {
+      "id": "4da83f2b-29a5-4bee-bfab-b2410594f41c",
+      "email": "bhavya.rani35@example.com",
+      "name": "Bhavya Rani",
+      "password_hash": "$2a$10$J0VyZV4oMpi4CIumjG3CkekKXMqvyGiDwjE/qjU0EnTk30hhM5.JG",
+      "role": "CANDIDATE",
+      "roll_number": "9000000034",
+      "created_at": "2026-08-27T09:54:53.959313+00:00",
+      "updated_at": "2026-08-27T09:54:53.959313+00:00"
+    },
+    "pooja.kumari36@example.com": {
+      "id": "d6c711c5-6966-441d-97e9-a64df3f096d3",
+      "email": "pooja.kumari36@example.com",
+      "name": "Pooja Kumari",
+      "password_hash": "$2a$10$6npRmSa4BKvXei7Uk/oSPu2T0TkFwxd9aFlq963QgvwnZNpRvKiHG",
+      "role": "CANDIDATE",
+      "roll_number": "9000000035",
+      "created_at": "2026-08-27T09:54:54.373843+00:00",
+      "updated_at": "2026-08-27T09:54:54.373843+00:00"
+    },
+    "ritika.rao37@example.com": {
+      "id": "edd626e6-bc95-46a7-b24e-e34185dbf1fe",
+      "email": "ritika.rao37@example.com",
+      "name": "Ritika Rao",
+      "password_hash": "$2a$10$evzC/q63qxQXrF8AWNVzX.bKI9nQ1y0om.wCcCjs7/Erfna7XYome",
+      "role": "CANDIDATE",
+      "roll_number": "9000000036",
+      "created_at": "2026-08-27T09:54:54.708509+00:00",
+      "updated_at": "2026-08-27T09:54:54.708509+00:00"
+    },
+    "meghana.reddy38@example.com": {
+      "id": "d4055786-d8c7-481c-ac42-65c2308f52dc",
+      "email": "meghana.reddy38@example.com",
+      "name": "Meghana Reddy",
+      "password_hash": "$2a$10$b9pGCMKo.UCQsLNPmni5S.PvwFly92dzsggWJBaZbj3bNGqZ17bsi",
+      "role": "CANDIDATE",
+      "roll_number": "9000000037",
+      "created_at": "2026-08-27T09:54:55.09391+00:00",
+      "updated_at": "2026-08-27T09:54:55.09391+00:00"
+    },
+    "sowmya.naidu39@example.com": {
+      "id": "6136893c-8dae-4435-90ef-fb4dea1fc90b",
+      "email": "sowmya.naidu39@example.com",
+      "name": "Sowmya Naidu",
+      "password_hash": "$2a$10$fTS19CbDVEuUF05eQ.hhMuyW7b9Uihp47rPGDf71Cpv83g/J2ONlC",
+      "role": "CANDIDATE",
+      "roll_number": "9000000038",
+      "created_at": "2026-08-27T09:54:55.409286+00:00",
+      "updated_at": "2026-08-27T09:54:55.409286+00:00"
+    },
+    "aishwarya.varma40@example.com": {
+      "id": "800ff5b4-52dc-4b02-9d90-bd21e42106bb",
+      "email": "aishwarya.varma40@example.com",
+      "name": "Aishwarya Varma",
+      "password_hash": "$2a$10$hjrmFBY3HYhrRSJSIOgg2Og4G44AHVLguvJfz3eQLmyJP7/TAeP0u",
+      "role": "CANDIDATE",
+      "roll_number": "9000000039",
+      "created_at": "2026-08-27T09:54:55.815447+00:00",
+      "updated_at": "2026-08-27T09:54:55.815447+00:00"
+    },
+    "krishna.reddy41@example.com": {
+      "id": "b54e2229-2836-498f-a9a0-4306d8d93e53",
+      "email": "krishna.reddy41@example.com",
+      "name": "Krishna Reddy",
+      "password_hash": "$2a$10$azbei/WkyxPKUl5aoWXEhulL3YnEdfAhBnfBkKHn/2F1pIPY4BGF6",
+      "role": "CANDIDATE",
+      "roll_number": "9000000040",
+      "created_at": "2026-08-27T09:54:56.221997+00:00",
+      "updated_at": "2026-08-27T09:54:56.221997+00:00"
+    },
+    "venkatesh.rao42@example.com": {
+      "id": "16710fb7-0edc-4269-971c-32a0c7abddae",
+      "email": "venkatesh.rao42@example.com",
+      "name": "Venkatesh Rao",
+      "password_hash": "$2a$10$4AN6RmbSFFUBzj2ENyjgs.m5UWbTafu5F0z20nJ2hRco1KuXBDCKm",
+      "role": "CANDIDATE",
+      "roll_number": "9000000041",
+      "created_at": "2026-08-27T09:54:56.657818+00:00",
+      "updated_at": "2026-08-27T09:54:56.657818+00:00"
+    },
+    "rakesh.naidu43@example.com": {
+      "id": "86aa7e8f-e4db-4124-b4f2-30beaa34ab0b",
+      "email": "rakesh.naidu43@example.com",
+      "name": "Rakesh Naidu",
+      "password_hash": "$2a$10$dDaRIWQEhRzdJR6DjiI4muBzwUQ.64Xdrw2sjdE81Ux9AlENdV5X2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000042",
+      "created_at": "2026-08-27T09:54:57.147462+00:00",
+      "updated_at": "2026-08-27T09:54:57.147462+00:00"
+    },
+    "mahesh.kumar44@example.com": {
+      "id": "678f7356-55db-4b01-96d7-797c53f239d0",
+      "email": "mahesh.kumar44@example.com",
+      "name": "Mahesh Kumar",
+      "password_hash": "$2a$10$i11Fock06iU8IgFRwE1KkuW6o7ZjCULBAoxtog1d/J8CjPTG.PkQa",
+      "role": "CANDIDATE",
+      "roll_number": "9000000043",
+      "created_at": "2026-08-27T09:54:57.489851+00:00",
+      "updated_at": "2026-08-27T09:54:57.489851+00:00"
+    },
+    "ravi.varma45@example.com": {
+      "id": "63d44327-0860-4975-b340-f3a2acca4ab6",
+      "email": "ravi.varma45@example.com",
+      "name": "Ravi Varma",
+      "password_hash": "$2a$10$F2INzAWlYfn2fXE0KVCOWOoXq.nQXnqN3FC6MzbM7m6k3PuOBH8g.",
+      "role": "CANDIDATE",
+      "roll_number": "9000000044",
+      "created_at": "2026-08-27T09:54:57.890459+00:00",
+      "updated_at": "2026-08-27T09:54:57.890459+00:00"
+    },
+    "surya.reddy46@example.com": {
+      "id": "d3cd9a92-f649-44f5-bedb-86a59b8c4235",
+      "email": "surya.reddy46@example.com",
+      "name": "Surya Reddy",
+      "password_hash": "$2a$10$reC.igtbcF9UF9pAJSv5z.Hxi87H2VDJ3Vtf1MUWjxe5b/NXP7CN2",
+      "role": "CANDIDATE",
+      "roll_number": "9000000045",
+      "created_at": "2026-08-27T09:54:58.350686+00:00",
+      "updated_at": "2026-08-27T09:54:58.350686+00:00"
+    },
+    "naveen.rao47@example.com": {
+      "id": "f5aa560d-ab64-4892-973a-2f582af9d004",
+      "email": "naveen.rao47@example.com",
+      "name": "Naveen Rao",
+      "password_hash": "$2a$10$tkhmuXB.3XTFp6rpn0/Od.xGHiu1dfwDtbC3EPtbJRCEK.q1GIBES",
+      "role": "CANDIDATE",
+      "roll_number": "9000000046",
+      "created_at": "2026-08-27T09:54:58.719023+00:00",
+      "updated_at": "2026-08-27T09:54:58.719023+00:00"
+    },
+    "manoj.naidu48@example.com": {
+      "id": "54c98ee9-c0b3-4b41-9e91-f5ecf41dd1de",
+      "email": "manoj.naidu48@example.com",
+      "name": "Manoj Naidu",
+      "password_hash": "$2a$10$VJRxfIKj34JiBfBOxH/Dp.VA9rOc/KcA3R1YMgz0v5ijqAYpQhwDm",
+      "role": "CANDIDATE",
+      "roll_number": "9000000047",
+      "created_at": "2026-08-27T09:54:59.034638+00:00",
+      "updated_at": "2026-08-27T09:54:59.034638+00:00"
+    },
+    "gopi.kumar49@example.com": {
+      "id": "1eac6bbb-528e-4359-82c7-48a876c71ebf",
+      "email": "gopi.kumar49@example.com",
+      "name": "Gopi Kumar",
+      "password_hash": "$2a$10$oivdd3b/sPVOfzdIMKKObuhQ3.1G/BHxLSHlm/vMxGkchGuP.nK7i",
+      "role": "CANDIDATE",
+      "roll_number": "9000000048",
+      "created_at": "2026-08-27T09:54:59.367362+00:00",
+      "updated_at": "2026-08-27T09:54:59.367362+00:00"
+    },
+    "sanjay.varma50@example.com": {
+      "id": "38303699-f946-4ba9-91ae-1143db046530",
+      "email": "sanjay.varma50@example.com",
+      "name": "Sanjay Varma",
+      "password_hash": "$2a$10$bD/QCeP/arKtV/Jfi6C9jOpJrujBCmAgIDgJaUdPrrqsXbzBWgM3C",
+      "role": "CANDIDATE",
+      "roll_number": "9000000049",
+      "created_at": "2026-08-27T09:54:59.745629+00:00",
+      "updated_at": "2026-08-27T09:54:59.745629+00:00"
+    }
+  }
+}

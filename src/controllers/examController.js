@@ -1,9 +1,10 @@
 import { supabase } from '../config/db.js'
+import { memorySlots, memoryRegistrations } from './slotController.js'
 
 export const getAllExams = async (req, res) => {
   try {
     const { status } = req.query
-    let query = supabase.from('ex_exams').select('*, ex_questions(id, section_id), ex_exam_sections(id, max_questions_limit, name), ex_attempts(count)')
+    let query = supabase.from('ex_exams').select('*, ex_questions(id, section_id), ex_exam_sections(id, max_questions_limit, name), ex_attempts(count), ex_exam_slots(id), ex_exam_registrations(id)')
 
     if (status) {
       query = query.eq('status', status.toUpperCase())
@@ -33,6 +34,26 @@ export const getAllExams = async (req, res) => {
         expectedQuestionsCount = questions.length
       }
 
+      // Memory slot fallback calculation
+      let memSlotCount = 0
+      for (const [k, arr] of memorySlots.entries()) {
+        if (String(k).toLowerCase() === String(e.id).toLowerCase()) {
+          memSlotCount += (arr || []).length
+        }
+      }
+      const dbSlotCount = (e.ex_exam_slots || []).length
+      const totalSlots = Math.max(dbSlotCount, memSlotCount)
+
+      // Memory student registration fallback calculation
+      let memStudentCount = 0
+      for (const reg of memoryRegistrations.values()) {
+        if (String(reg.examId).toLowerCase() === String(e.id).toLowerCase()) {
+          memStudentCount++
+        }
+      }
+      const dbStudentCount = (e.ex_exam_registrations || []).length
+      const totalStudents = Math.max(dbStudentCount, memStudentCount)
+
       return {
         id: e.id,
         code: e.code,
@@ -52,9 +73,12 @@ export const getAllExams = async (req, res) => {
         _count: {
           questions: questions.length,
           attempts: e.ex_attempts?.[0]?.count || 0,
+          slots: totalSlots,
+          students: totalStudents,
         },
       }
     })
+
 
     res.json({ exams: formatted })
   } catch (error) {
@@ -138,7 +162,9 @@ export const createExam = async (req, res) => {
       description,
       durationMinutes,
       totalMarks,
+      // Support both field name variants from the frontend form
       passMarks,
+      passingMarks,
       status,
       proctoringEnabled,
       blockTabSwitch,
@@ -146,6 +172,9 @@ export const createExam = async (req, res) => {
       shuffleOptions,
       showImmediateResults,
     } = req.body
+
+    // Resolve pass marks: admin-set value takes priority; fallback to 0 (never auto-set)
+    const resolvedPassMarks = Number(passMarks ?? passingMarks ?? 0)
 
     const { data: exam, error } = await supabase
       .from('ex_exams')
@@ -155,7 +184,7 @@ export const createExam = async (req, res) => {
         description,
         duration_minutes: durationMinutes || 60,
         total_marks: totalMarks || 0,
-        pass_marks: passMarks || 0,
+        pass_marks: resolvedPassMarks,
         status: status || 'DRAFT',
         proctoring_enabled: proctoringEnabled ?? true,
         block_tab_switch: blockTabSwitch ?? true,
@@ -184,7 +213,9 @@ export const updateExam = async (req, res) => {
     if (req.body.description !== undefined) updateData.description = req.body.description
     if (req.body.durationMinutes) updateData.duration_minutes = req.body.durationMinutes
     if (req.body.totalMarks !== undefined) updateData.total_marks = req.body.totalMarks
-    if (req.body.passMarks !== undefined) updateData.pass_marks = req.body.passMarks
+    // Support both passMarks and passingMarks (frontend form uses passingMarks)
+    if (req.body.passMarks !== undefined) updateData.pass_marks = Number(req.body.passMarks)
+    if (req.body.passingMarks !== undefined) updateData.pass_marks = Number(req.body.passingMarks)
     if (req.body.status) updateData.status = req.body.status
     if (req.body.proctoringEnabled !== undefined) updateData.proctoring_enabled = req.body.proctoringEnabled
     if (req.body.shuffleQuestions !== undefined) updateData.shuffle_questions = req.body.shuffleQuestions
@@ -204,5 +235,22 @@ export const updateExam = async (req, res) => {
   } catch (error) {
     console.error('Error updating exam:', error)
     res.status(500).json({ error: error.message || 'Failed to update exam' })
+  }
+}
+
+export const deleteExam = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { error } = await supabase
+      .from('ex_exams')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    res.json({ message: 'Exam deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting exam:', error)
+    res.status(500).json({ error: error.message || 'Failed to delete exam' })
   }
 }

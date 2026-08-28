@@ -1,17 +1,32 @@
 import { supabase } from '../config/db.js'
+import { memoryRegistrations } from './slotController.js'
 
 export const computeSectionScores = (sections, allQuestions, attemptAnswers) => {
+  const answeredQIds = new Set((attemptAnswers || []).map((a) => a.question_id))
+  const servedQuestions = (attemptAnswers || []).length > 0
+    ? allQuestions.filter((q) => answeredQIds.has(q.id))
+    : allQuestions
+
   return sections.map((sec) => {
-    const secQs = allQuestions.filter((q) => q.section_id === sec.id)
+    const secQs = servedQuestions.filter((q) => q.section_id === sec.id)
     const secQIds = secQs.map((q) => q.id)
-    const secAnswers = attemptAnswers.filter((a) => secQIds.includes(a.question_id))
+    const secAnswers = (attemptAnswers || []).filter((a) => secQIds.includes(a.question_id))
     const score = secAnswers.reduce((sum, a) => sum + (Number(a.score_awarded) || 0), 0)
+    const totalSecMarks = secQs.reduce((sum, q) => sum + (Number(q.points) || 1), 0)
+
+    // Treat cutoff_marks as a percentage (%) of served section total points
+    const cutoffPercentage = Number(sec.cutoff_marks) || 0
+    const requiredScore = totalSecMarks > 0 ? (cutoffPercentage / 100) * totalSecMarks : 0
+    const cutoffMet = score >= requiredScore
+
     return {
       id: sec.id,
       name: sec.name,
       score,
-      cutoffMarks: sec.cutoff_marks,
-      cutoffMet: score >= (sec.cutoff_marks || 0),
+      totalSecMarks,
+      cutoffPercentage,
+      requiredScore,
+      cutoffMet,
     }
   })
 }
@@ -97,12 +112,12 @@ export const startAttempt = async (req, res) => {
       if (attemptErr) throw attemptErr
       attempt = newAttempt
 
-      // Subset questions based on section rules
+      // Subset questions based on section rules (always shuffle pool to select random subset)
       const selectedQuestions = []
       if (sections.length > 0) {
         sections.forEach((sec) => {
           let secQs = allQuestions.filter((q) => q.section_id === sec.id)
-          if (shuffle) secQs = shuffleArray(secQs)
+          secQs = shuffleArray(secQs) // Randomize pool so each candidate gets a random subset of 15 out of 100!
           const limit = sec.max_questions_limit
           const count = limit && limit > 0 ? Math.min(secQs.length, limit) : secQs.length
           selectedQuestions.push(...secQs.slice(0, count))
@@ -134,17 +149,24 @@ export const startAttempt = async (req, res) => {
     const assignedQuestionIds = new Set((attempt.ex_answers || []).map((a) => a.question_id))
     const assignedQuestions = allQuestions.filter((q) => assignedQuestionIds.has(q.id))
 
-    const formatQuestion = (q) => ({
-      id: q.id,
-      sectionId: q.section_id,
-      subject: q.subject,
-      topic: q.topic,
-      type: q.type,
-      statement: q.statement,
-      options: typeof q.options_json === 'string' ? JSON.parse(q.options_json) : (q.options_json || []),
-      points: q.points,
-      difficulty: q.difficulty,
-    })
+    const formatQuestion = (q) => {
+      let opts = typeof q.options_json === 'string' ? JSON.parse(q.options_json) : (q.options_json || [])
+      // Dual Randomization: Shuffle options for every student
+      if (Array.isArray(opts)) {
+        opts = shuffleArray(opts)
+      }
+      return {
+        id: q.id,
+        sectionId: q.section_id,
+        subject: q.subject,
+        topic: q.topic,
+        type: q.type,
+        statement: q.statement,
+        options: opts,
+        points: q.points,
+        difficulty: q.difficulty,
+      }
+    }
 
     let formattedSections
     let unsectionedQuestions
@@ -231,6 +253,60 @@ export const saveAnswer = async (req, res) => {
   }
 }
 
+export const isAnswerCorrect = (q, rawSelectedOption) => {
+  if (!q || rawSelectedOption === null || rawSelectedOption === undefined) return false
+  const selectedStr = String(rawSelectedOption).trim()
+  if (!selectedStr) return false
+
+  const correctStr = String(q.correct_answer ?? '').trim()
+  if (!correctStr) return false
+
+  // 1. Direct string match (case-insensitive)
+  if (selectedStr.toLowerCase() === correctStr.toLowerCase()) return true
+
+  // Parse original options array
+  const origOptions = typeof q.options_json === 'string'
+    ? JSON.parse(q.options_json)
+    : (q.options_json || [])
+
+  if (Array.isArray(origOptions) && origOptions.length > 0) {
+    // 2. If correct_answer is an index (e.g. "0", "1", "2", "3")
+    const correctAsIdx = parseInt(correctStr, 10)
+    if (!isNaN(correctAsIdx) && correctAsIdx >= 0 && correctAsIdx < origOptions.length) {
+      const targetOptionText = String(origOptions[correctAsIdx]).trim()
+      if (selectedStr.toLowerCase() === targetOptionText.toLowerCase()) return true
+      if (selectedStr === String(correctAsIdx)) return true
+    }
+
+    // 3. If correct_answer is a letter (e.g. "A", "B", "C", "D")
+    const letterMap = { A: 0, B: 1, C: 2, D: 3, E: 4, F: 5 }
+    const letterIdx = letterMap[correctStr.toUpperCase()]
+    if (letterIdx !== undefined && letterIdx < origOptions.length) {
+      const targetOptionText = String(origOptions[letterIdx]).trim()
+      if (selectedStr.toLowerCase() === targetOptionText.toLowerCase()) return true
+      if (selectedStr === String(letterIdx)) return true
+    }
+
+    // 4. If selectedStr is an index (e.g. "0", "1") and correctStr matches original option at that index
+    const selectedAsIdx = parseInt(selectedStr, 10)
+    if (!isNaN(selectedAsIdx) && selectedAsIdx >= 0 && selectedAsIdx < origOptions.length) {
+      const chosenOptionText = String(origOptions[selectedAsIdx]).trim()
+      if (chosenOptionText.toLowerCase() === correctStr.toLowerCase()) return true
+    }
+  }
+
+  // 5. Numerical matching
+  if (q.type === 'NUMERICAL') {
+    const selNum = parseFloat(selectedStr)
+    const corNum = parseFloat(correctStr)
+    if (!isNaN(selNum) && !isNaN(corNum)) {
+      return Math.abs(selNum - corNum) < 0.0001
+    }
+  }
+
+  return false
+}
+
 export const submitAttempt = async (req, res) => {
   try {
     const { attemptId } = req.body
@@ -258,21 +334,33 @@ export const submitAttempt = async (req, res) => {
     let requiresManual = false
 
     for (const q of assignedQuestions) {
-      totalMaxScore += q.points
+      const qPoints = Number(q.points) || 1
+      totalMaxScore += qPoints
       const ans = answers.find((a) => a.question_id === q.id)
+      const negPenalty = Number(q.negative_points) || 0
 
       if (q.type === 'MCQ' || q.type === 'SINGLE_CHOICE' || q.type === 'NUMERICAL') {
-        if (ans && String(ans.selected_option) === String(q.correct_answer)) {
-          totalScore += q.points
-          await supabase.from('ex_answers').update({ score_awarded: q.points }).eq('id', ans.id)
+        const hasAnswer = ans && ans.selected_option !== null && ans.selected_option !== undefined && String(ans.selected_option).trim() !== ''
+        if (hasAnswer && isAnswerCorrect(q, ans.selected_option)) {
+          // Correct answer → full marks (1 pt)
+          totalScore += qPoints
+          await supabase.from('ex_answers').update({ score_awarded: qPoints }).eq('id', ans.id)
+        } else if (hasAnswer && negPenalty > 0) {
+          // Wrong answer with negative marking → deduct penalty
+          totalScore -= negPenalty
+          await supabase.from('ex_answers').update({ score_awarded: -negPenalty }).eq('id', ans.id)
         } else if (ans) {
+          // Wrong answer with no negative marking OR unattempted → 0
           await supabase.from('ex_answers').update({ score_awarded: 0 }).eq('id', ans.id)
         }
       } else {
+        // Subjective / Essay — requires manual evaluation
         requiresManual = true
       }
     }
 
+    // Ensure total score never goes below 0
+    totalScore = Math.max(0, totalScore)
     const percentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0
 
     let sectionalPass = null
@@ -322,5 +410,241 @@ export const submitAttempt = async (req, res) => {
   } catch (error) {
     console.error('Error submitting exam:', error)
     res.status(500).json({ error: error.message || 'Failed to submit exam attempt' })
+  }
+}
+
+export const getExamLeaderboard = async (req, res) => {
+  try {
+    const examId = req.params.id || req.params.examId
+
+    if (!examId || examId === 'undefined') {
+      return res.status(400).json({ error: 'Valid exam ID is required' })
+    }
+
+    const { data: exam } = await supabase
+      .from('ex_exams')
+      .select('id, title, code, total_marks, pass_marks, ex_questions(id, section_id, points), ex_exam_sections(id, max_questions_limit)')
+      .eq('id', examId)
+      .single()
+
+    const { data: attempts, error } = await supabase
+      .from('ex_attempts')
+      .select('*, ex_answers(question_id, score_awarded)')
+      .eq('exam_id', examId)
+      .in('status', ['SUBMITTED', 'EVALUATED', 'COMPLETED'])
+
+    if (error) throw error
+
+    const qMap = new Map((exam?.ex_questions || []).map((q) => [q.id, Number(q.points) || 1]))
+
+    let defaultMaxScore = Number(exam?.total_marks) || 0
+    if (!defaultMaxScore && exam?.ex_exam_sections?.length) {
+      (exam.ex_exam_sections || []).forEach((sec) => {
+        const secQs = (exam.ex_questions || []).filter((q) => q.section_id === sec.id)
+        secQs.sort((a, b) => (Number(b.points) || 1) - (Number(a.points) || 1))
+        const limit = Number(sec.max_questions_limit)
+        const count = limit && limit > 0 ? Math.min(secQs.length, limit) : secQs.length
+        defaultMaxScore += secQs.slice(0, count).reduce((s, q) => s + (Number(q.points) || 1), 0)
+      })
+    }
+    if (!defaultMaxScore) {
+      defaultMaxScore = (exam?.ex_questions || []).reduce((s, q) => s + (Number(q.points) || 1), 0) || 100
+    }
+
+    const candidateIds = Array.from(new Set((attempts || []).map((a) => a.candidate_id).filter(Boolean)))
+    let users = []
+    if (candidateIds.length > 0) {
+      const { data: fetchedUsers } = await supabase
+        .from('ex_users')
+        .select('id, name, email, roll_number')
+        .in('id', candidateIds)
+      users = fetchedUsers || []
+    }
+
+    const userMap = new Map(users.map((u) => [u.id, u]))
+
+    for (const reg of memoryRegistrations.values()) {
+      if (reg.candidateId && !userMap.has(reg.candidateId)) {
+        userMap.set(reg.candidateId, {
+          id: reg.candidateId,
+          name: reg.name || 'Candidate',
+          email: reg.email || '',
+          roll_number: reg.rollNumber || '',
+        })
+      }
+    }
+
+    const formatted = (attempts || []).map((a) => {
+      const u = userMap.get(a.candidate_id)
+      const start = a.started_at ? new Date(a.started_at) : null
+      const end = a.submitted_at ? new Date(a.submitted_at) : null
+      const durationSeconds = (start && end) ? Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000)) : 0
+
+      const totalScore = Number(a.total_score) || 0
+
+      // Compute attempt-specific served max score
+      const servedAns = a.ex_answers || []
+      let attemptMaxScore = 0
+      if (servedAns.length > 0) {
+        attemptMaxScore = servedAns.reduce((sum, ans) => sum + (qMap.get(ans.question_id) || 1), 0)
+      }
+      const maxScore = attemptMaxScore || defaultMaxScore
+
+      const passCutoff = Number(exam?.pass_marks) || 0
+      const percentage = Number(a.percentage) || (maxScore > 0 ? Number(((totalScore / maxScore) * 100).toFixed(2)) : 0)
+      const overallCutoffPassed = totalScore >= passCutoff
+      const sectionalCutoffsPassed = a.sectional_pass !== false
+      const passed = overallCutoffPassed && sectionalCutoffsPassed
+
+      return {
+        attemptId: a.id,
+        candidateId: a.candidate_id,
+        candidateName: u?.name || 'Candidate',
+        candidateEmail: u?.email || 'student@exam.com',
+        rollNumber: u?.roll_number || 'STU-1001',
+        totalScore,
+        maxScore,
+        percentage,
+        passed,
+        durationSeconds,
+        durationFormatted: `${Math.floor(durationSeconds / 60)}m ${durationSeconds % 60}s`,
+        submittedAt: a.submitted_at || a.created_at,
+        proctoringFlags: a.tab_switch_count || 0,
+      }
+    })
+
+    formatted.sort((a, b) => {
+      if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore
+      return a.durationSeconds - b.durationSeconds
+    })
+
+    const ranked = formatted.map((item, index) => ({
+      rank: index + 1,
+      ...item,
+    }))
+
+    res.json({
+      exam: {
+        id: exam?.id,
+        title: exam?.title,
+        code: exam?.code,
+        totalMarks: exam?.total_marks,
+        passMarks: exam?.pass_marks,
+      },
+      leaderboard: ranked,
+      metrics: {
+        totalAttempts: ranked.length,
+        highestScore: ranked[0]?.totalScore || 0,
+        averageScore: ranked.length > 0 ? Number((ranked.reduce((s, r) => s + r.totalScore, 0) / ranked.length).toFixed(2)) : 0,
+        passCount: ranked.filter((r) => r.passed).length,
+        passRate: ranked.length > 0 ? Number(((ranked.filter((r) => r.passed).length / ranked.length) * 100).toFixed(1)) : 0,
+      },
+    })
+  } catch (error) {
+    console.error('Error generating leaderboard:', error)
+    res.status(500).json({ error: error.message || 'Failed to generate leaderboard' })
+  }
+}
+
+export const getAttemptItemizedDetails = async (req, res) => {
+  try {
+    const { attemptId } = req.params
+
+    const { data: attempt, error } = await supabase
+      .from('ex_attempts')
+      .select('*, ex_exams(*), ex_answers(*)')
+      .eq('id', attemptId)
+      .single()
+
+    if (error || !attempt) return res.status(404).json({ error: 'Attempt not found' })
+
+    const { data: candidateUser } = await supabase
+      .from('ex_users')
+      .select('name, email, roll_number')
+      .eq('id', attempt.candidate_id)
+      .maybeSingle()
+
+    const examId = attempt.exam_id
+    const { data: questions } = await supabase
+      .from('ex_questions')
+      .select('*, ex_exam_sections(name)')
+      .eq('exam_id', examId)
+
+    const answers = attempt.ex_answers || []
+    const qMap = new Map((questions || []).map((q) => [q.id, q]))
+
+    const itemized = answers.map((ans) => {
+      const q = qMap.get(ans.question_id)
+      const options = typeof q?.options_json === 'string' ? JSON.parse(q.options_json) : (q?.options_json || [])
+      const isCorrect = isAnswerCorrect(q, ans.selected_option)
+      const score = Number(ans.score_awarded) || 0
+
+      return {
+        questionId: q?.id,
+        statement: q?.statement || 'Question statement',
+        type: q?.type || 'MCQ',
+        sectionName: q?.ex_exam_sections?.name || 'General',
+        points: q?.points || 1,
+        negativePoints: Number(q?.negative_points) || 0,
+        options,
+        selectedOption: ans.selected_option || '(Not Answered)',
+        correctAnswer: q?.correct_answer || 'N/A',
+        scoreAwarded: score,
+        isCorrect,
+      }
+    })
+
+    res.json({
+      attemptId,
+      candidate: {
+        id: attempt.candidate_id,
+        name: candidateUser?.name || 'Candidate',
+        email: candidateUser?.email || '',
+        rollNumber: candidateUser?.roll_number || '',
+      },
+      examTitle: attempt.ex_exams?.title,
+      totalScore: attempt.total_score,
+      percentage: attempt.percentage,
+      submittedAt: attempt.submitted_at,
+      responses: itemized,
+    })
+  } catch (error) {
+    console.error('Error fetching attempt details:', error)
+    res.status(500).json({ error: error.message || 'Failed to fetch attempt details' })
+  }
+}
+
+export const sendScoreEmail = async (req, res) => {
+  try {
+    const { attemptId } = req.params
+
+    const { data: attempt } = await supabase
+      .from('ex_attempts')
+      .select('*, ex_exams(title, total_marks)')
+      .eq('id', attemptId)
+      .single()
+
+    if (!attempt) return res.status(404).json({ error: 'Attempt not found' })
+
+    const { data: user } = await supabase
+      .from('ex_users')
+      .select('name, email')
+      .eq('id', attempt.candidate_id)
+      .maybeSingle()
+
+    const candidateEmail = user?.email || req.body.email || 'student@example.com'
+    const candidateName = user?.name || req.body.name || 'Candidate'
+
+    console.log(`📧 [MOCK EMAIL DISPATCH] Sent score report for "${attempt.ex_exams?.title}" to ${candidateName} <${candidateEmail}>: Score ${attempt.total_score}/${attempt.ex_exams?.total_marks} (${attempt.percentage}%)`)
+
+    res.json({
+      message: `Score report email successfully queued for ${candidateName} (${candidateEmail})`,
+      recipient: candidateEmail,
+      score: attempt.total_score,
+      percentage: attempt.percentage,
+    })
+  } catch (err) {
+    console.error('Error sending score email:', err)
+    res.status(500).json({ error: err.message || 'Failed to dispatch email' })
   }
 }
