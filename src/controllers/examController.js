@@ -345,7 +345,7 @@ export const notifyCandidates = async (req, res) => {
         durationMinutes: exam.duration_minutes,
         totalMarks: exam.total_marks,
         slotBookingEnabled: exam.slot_booking_enabled !== false,
-        candidatePortalUrl: `${process.env.CORS_ORIGIN || 'http://localhost:5050'}/login`,
+        candidatePortalUrl: `${process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5050'}/login`,
       })
       if (result.simulated) simulated = true
       sentCount++

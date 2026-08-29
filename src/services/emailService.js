@@ -36,9 +36,9 @@ export const sendExamInvitationEmail = async ({
   examTitle,
   examCode,
   durationMinutes,
-  totalMarks,
-  candidatePortalUrl = 'http://localhost:5050/login',
+  candidatePortalUrl,
 }) => {
+  const portalUrl = candidatePortalUrl || `${process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5050'}/login`
   const transporter = createTransporter()
   const fromAddress = process.env.SMTP_FROM || `"Ottobon Examination Portal" <${process.env.SMTP_USER || 'ai.acad.ottobon@gmail.com'}>`
   const supportContact = process.env.SUPPORT_CONTACT || '+91 9666721646'
@@ -118,7 +118,7 @@ export const sendExamInvitationEmail = async ({
                     <table width="100%" border="0" cellspacing="0" cellpadding="8">
                       <tr>
                         <td width="35%" style="font-size:13px; font-weight:600; color:#64748b;">Assessment Platform:</td>
-                        <td style="font-size:13px; font-weight:700;"><a href="${candidatePortalUrl}" target="_blank" style="color:#2563eb; text-decoration:underline;">${candidatePortalUrl}</a></td>
+                        <td style="font-size:13px; font-weight:700;"><a href="${portalUrl}" target="_blank" style="color:#2563eb; text-decoration:underline;">${portalUrl}</a></td>
                       </tr>
                       <tr>
                         <td style="font-size:13px; font-weight:600; color:#64748b;">Username (Email):</td>
