@@ -337,6 +337,11 @@ export const getCandidateAssignedExams = async (req, res) => {
       return true
     })
 
+    const { data: dbAttempts } = await supabase
+      .from('ex_attempts')
+      .select('exam_id, status, submitted_at, total_score')
+      .eq('candidate_id', candidateId)
+
     const formatted = filtered.map((e) => {
       const regKey = `${candidateId}_${e.id}`
       const memReg = memoryRegistrations.get(regKey)
@@ -357,6 +362,13 @@ export const getCandidateAssignedExams = async (req, res) => {
         }
       }
 
+      const myAtt = dbAttempts?.find((att) => att.exam_id === e.id)
+      const userAttempt = myAtt ? {
+        status: myAtt.status,
+        submittedAt: myAtt.submitted_at,
+        totalScore: myAtt.total_score,
+      } : null
+
       return {
         id: e.id,
         code: e.code,
@@ -367,6 +379,8 @@ export const getCandidateAssignedExams = async (req, res) => {
         passMarks: e.pass_marks,
         status: e.status,
         proctoringEnabled: e.proctoring_enabled,
+        publishedResults: Boolean(e.published_results),
+        userAttempt,
         bookedSlot,
         _count: { questions: e.ex_questions?.length || 0 },
       }
