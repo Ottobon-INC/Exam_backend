@@ -14,13 +14,13 @@ export const setupProctorSocket = (io) => {
       socket.join('GLOBAL_PROCTORS') // Ensure proctors receive all events across exam rooms
       console.log(`[ProctorSocket] ${role} (${socket.id}) joined exam room: ${examId}`)
 
-      if (!examRooms.has(examId)) {
-        examRooms.set(examId, new Map())
-      }
-
       if (role === 'CANDIDATE') {
+        if (!examRooms.has(examId)) {
+          examRooms.set(examId, new Map())
+        }
         const candidateData = {
           candidateId,
+          examId,
           candidateName,
           rollNumber,
           socketId: socket.id,
@@ -28,15 +28,17 @@ export const setupProctorSocket = (io) => {
         }
         examRooms.get(examId).set(candidateId, candidateData)
 
-        // Broadcast to proctors in this room & global proctor channel
+        // Broadcast to proctors in this room & global proctor channels
         proctorNamespace.to(examId).emit('candidate_online', candidateData)
         proctorNamespace.to('GLOBAL_PROCTORS').emit('candidate_online', candidateData)
+        proctorNamespace.emit('candidate_online', candidateData)
       } else if (role === 'PROCTOR') {
-        // Send all existing active candidates across all exam rooms to the newly joined proctor
+        // Send ALL existing active candidates across ALL exam rooms to the newly joined proctor
         for (const [eId, roomCandidates] of examRooms.entries()) {
           if (examId !== 'ALL' && String(eId) !== String(examId)) continue
           for (const [cId, cData] of roomCandidates.entries()) {
-            socket.emit('candidate_online', { ...cData, examId: eId })
+            const payload = { ...cData, examId: eId }
+            socket.emit('candidate_online', payload)
             if (cData.latestFrame) {
               socket.emit('proctor_frame_stream', {
                 examId: eId,
@@ -54,6 +56,7 @@ export const setupProctorSocket = (io) => {
 
     socket.on('candidate_frame', (data) => {
       const { examId, candidateId, candidateName, rollNumber, frame } = data
+      if (!examId || !candidateId) return
 
       // Cache the snapshot in memory for this candidate
       if (!examRooms.has(examId)) {
@@ -63,25 +66,27 @@ export const setupProctorSocket = (io) => {
       const existing = room.get(candidateId) || { candidateId, candidateName, rollNumber }
       existing.latestFrame = frame
       existing.lastHeartbeat = new Date()
+      existing.candidateName = candidateName || existing.candidateName
+      existing.rollNumber = rollNumber || existing.rollNumber
       room.set(candidateId, existing)
 
-      // Broadcast to this exam room and all connected proctors
+      // Broadcast to this exam room, global channel, and all connected proctor sockets
       const payload = {
         examId,
         candidateId,
-        candidateName,
-        rollNumber,
+        candidateName: candidateName || existing.candidateName || 'Candidate',
+        rollNumber: rollNumber || existing.rollNumber || 'CANDIDATE',
         frame,
         lastHeartbeat: new Date(),
       }
       proctorNamespace.to(examId).emit('proctor_frame_stream', payload)
       proctorNamespace.to('GLOBAL_PROCTORS').emit('proctor_frame_stream', payload)
+      proctorNamespace.emit('proctor_frame_stream', payload)
       console.log(`[ProctorSocket] Snapshot relayed for candidate ${candidateName} (${candidateId}) in room ${examId}`)
     })
 
-    socket.on('log_violation', async (data) => {
+    const handleViolation = async (data) => {
       const { examId, attemptId, candidateId, eventType, severity, details } = data
-
       try {
         if (attemptId) {
           await supabase.from('ex_proctor_logs').insert({
@@ -101,29 +106,31 @@ export const setupProctorSocket = (io) => {
         console.error('[ProctorSocket] Error saving violation log:', err)
       }
 
-      proctorNamespace.to(examId).emit('violation_alert', {
+      const alertPayload = {
+        examId,
         candidateId,
         eventType,
         severity,
         details,
         timestamp: new Date(),
-      })
-      proctorNamespace.to('GLOBAL_PROCTORS').emit('violation_alert', {
-        candidateId,
-        eventType,
-        severity,
-        details,
-        timestamp: new Date(),
-      })
-    })
+      }
+      proctorNamespace.to(examId).emit('violation_alert', alertPayload)
+      proctorNamespace.to('GLOBAL_PROCTORS').emit('violation_alert', alertPayload)
+      proctorNamespace.emit('violation_alert', alertPayload)
+    }
+
+    socket.on('log_violation', handleViolation)
+    socket.on('candidate_violation', handleViolation)
 
     socket.on('proctor_action', ({ examId, candidateId, action, message }) => {
-      proctorNamespace.to(examId).emit('proctor_intervention', {
+      const actionPayload = {
         targetCandidateId: candidateId,
         action,
         message,
         timestamp: new Date(),
-      })
+      }
+      proctorNamespace.to(examId).emit('proctor_intervention', actionPayload)
+      proctorNamespace.emit('proctor_intervention', actionPayload)
     })
 
     socket.on('disconnect', () => {

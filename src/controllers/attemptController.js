@@ -380,7 +380,7 @@ export const submitAttempt = async (req, res) => {
     const { data: updatedAttempt, error: updateErr } = await supabase
       .from('ex_attempts')
       .update({
-        status: (requiresManual || !exam?.published_results) ? 'SUBMITTED' : 'EVALUATED',
+        status: 'SUBMITTED',
         submitted_at: new Date().toISOString(),
         total_score: totalScore,
         percentage: parseFloat(percentage.toFixed(2)),
@@ -782,5 +782,43 @@ export const exportItemizedResultsCSV = async (req, res) => {
   } catch (err) {
     console.error('Error exporting CSV itemized report:', err)
     res.status(500).json({ error: err.message || 'Failed to export itemized results CSV report' })
+  }
+}
+
+export const getActiveProctoringCandidates = async (req, res) => {
+  try {
+    const { examId } = req.query
+
+    let query = supabase
+      .from('ex_attempts')
+      .select('id, exam_id, candidate_id, status, started_at, violations, ex_users(id, name, email, roll_number), ex_exams(id, title, code)')
+      .eq('status', 'IN_PROGRESS')
+
+    if (examId && examId !== 'ALL') {
+      query = query.eq('exam_id', examId)
+    }
+
+    const { data: activeAttempts, error } = await query
+
+    if (error) throw error
+
+    const activeList = (activeAttempts || []).map((att) => ({
+      id: att.candidate_id,
+      attemptId: att.id,
+      examId: att.exam_id,
+      name: att.ex_users?.name || 'Candidate',
+      rollNumber: att.ex_users?.roll_number || 'CANDIDATE',
+      email: att.ex_users?.email || '',
+      examTitle: att.ex_exams?.title,
+      examCode: att.ex_exams?.code,
+      status: 'Active',
+      violations: att.violations || 0,
+      startedAt: att.started_at,
+    }))
+
+    res.json({ activeCandidates: activeList })
+  } catch (error) {
+    console.error('Error fetching active proctoring candidates:', error)
+    res.status(500).json({ error: error.message || 'Failed to fetch active candidates' })
   }
 }

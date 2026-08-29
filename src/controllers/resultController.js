@@ -32,9 +32,8 @@ export const getExamResults = async (req, res) => {
     }
 
     const isPublished = Boolean(exam.published_results)
-    const isEvaluated = candidateAttempt?.status === 'EVALUATED'
 
-    if (isCandidate && !isPublished && !isEvaluated) {
+    if (isCandidate && !isPublished) {
       return res.json({
         isPendingEvaluation: true,
         message: 'Your examination has been completed! We will evaluate your submission and reach out to you soon with your score report.',
@@ -42,7 +41,7 @@ export const getExamResults = async (req, res) => {
         attempt: {
           id: candidateAttempt?.id,
           submittedAt: candidateAttempt?.submitted_at || candidateAttempt?.updated_at || new Date().toISOString(),
-          status: candidateAttempt?.status || 'SUBMITTED',
+          status: 'SUBMITTED',
         },
       })
     }

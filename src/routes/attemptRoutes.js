@@ -5,6 +5,7 @@ import {
   submitAttempt,
   getAttemptItemizedDetails,
   sendScoreEmail,
+  getActiveProctoringCandidates,
 } from '../controllers/attemptController.js'
 import { authenticate } from '../middlewares/auth.js'
 
@@ -12,6 +13,7 @@ const router = Router()
 
 router.use(authenticate)
 
+router.get('/live-active', getActiveProctoringCandidates)
 router.post('/start', startAttempt)
 router.post('/answer', saveAnswer)
 router.post('/submit', submitAttempt)
