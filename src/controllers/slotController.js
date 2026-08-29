@@ -10,6 +10,7 @@ const DATA_FILE = path.join(__dirname, '../../data_store.json')
 export const memorySlots = new Map()       // examId -> Array of slots
 export const memoryRegistrations = new Map() // `${candidateId}_${examId}` -> registration object
 export const memoryUsers = new Map()
+export const memoryExamSettings = new Map() // examId -> { slotBookingEnabled: boolean }
 
 // Load persisted state from disk on startup
 const loadStateFromDisk = () => {
@@ -27,7 +28,10 @@ const loadStateFromDisk = () => {
       if (data.users) {
         Object.entries(data.users).forEach(([k, val]) => memoryUsers.set(k, val))
       }
-      console.log(`✅ Restored local data store from disk: ${memorySlots.size} slot groups, ${memoryRegistrations.size} registrations.`)
+      if (data.examSettings) {
+        Object.entries(data.examSettings).forEach(([k, val]) => memoryExamSettings.set(k, val))
+      }
+      console.log(`✅ Restored local data store from disk: ${memorySlots.size} slot groups, ${memoryRegistrations.size} registrations, ${memoryExamSettings.size} exam settings.`)
     }
   } catch (err) {
     console.error('Failed to load local data store from disk:', err)
@@ -45,10 +49,19 @@ export const saveStateToDisk = () => {
     const usersObj = {}
     memoryUsers.forEach((v, k) => (usersObj[k] = v))
 
-    fs.writeFileSync(DATA_FILE, JSON.stringify({ slots: slotsObj, registrations: regsObj, users: usersObj }, null, 2))
+    const settingsObj = {}
+    memoryExamSettings.forEach((v, k) => (settingsObj[k] = v))
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify({ slots: slotsObj, registrations: regsObj, users: usersObj, examSettings: settingsObj }, null, 2))
   } catch (err) {
     console.error('Failed to save data store to disk:', err)
   }
+}
+
+export const setExamSlotBookingSetting = (examId, enabled) => {
+  if (!examId) return
+  memoryExamSettings.set(String(examId), { slotBookingEnabled: Boolean(enabled) })
+  saveStateToDisk()
 }
 
 loadStateFromDisk()
@@ -454,6 +467,14 @@ export const getCandidateAssignedExams = async (req, res) => {
         totalScore: myAtt.total_score,
       } : null
 
+      const localSetting = memoryExamSettings.get(String(e.id))
+      let slotBookingEnabled = true
+      if (localSetting && localSetting.slotBookingEnabled !== undefined) {
+        slotBookingEnabled = localSetting.slotBookingEnabled
+      } else if (e.slot_booking_enabled !== undefined && e.slot_booking_enabled !== null) {
+        slotBookingEnabled = Boolean(e.slot_booking_enabled)
+      }
+
       return {
         id: e.id,
         code: e.code,
@@ -464,6 +485,7 @@ export const getCandidateAssignedExams = async (req, res) => {
         passMarks: e.pass_marks,
         status: e.status,
         proctoringEnabled: e.proctoring_enabled,
+        slotBookingEnabled,
         publishedResults: Boolean(e.published_results),
         userAttempt,
         bookedSlot,
@@ -578,6 +600,30 @@ export const getMyBooking = async (req, res) => {
     const candidateId = req.user.id
 
     let booking = null
+
+    // Check if exam has slot booking disabled (Direct Access Mode)
+    const localSetting = memoryExamSettings.get(String(examId))
+    const { data: examData } = await supabase
+      .from('ex_exams')
+      .select('slot_booking_enabled')
+      .eq('id', examId)
+      .maybeSingle()
+
+    const isSlotBookingDisabled = (localSetting && localSetting.slotBookingEnabled === false) || (examData && examData.slot_booking_enabled === false)
+
+    if (isSlotBookingDisabled) {
+      return res.json({
+        booking: {
+          slotId: 'DIRECT_ACCESS',
+          examId,
+          candidateId,
+          startTime: new Date().toISOString(),
+          endTime: new Date(Date.now() + 864000000).toISOString(),
+          bookedAt: new Date().toISOString(),
+          isDirectAccess: true,
+        }
+      })
+    }
 
     // Query Supabase DB ex_exam_registrations
     const { data } = await supabase

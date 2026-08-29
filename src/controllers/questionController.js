@@ -149,9 +149,9 @@ export const bulkCreateQuestions = async (req, res) => {
       type: normalizeType(q.type),
       statement: q.statement,
       options_json: q.options ? JSON.stringify(q.options) : null,
-      correct_answer: String(q.correctAnswer ?? '0'),
-      points: 1,
-      negative_points: 0,
+      correct_answer: String(q.correctAnswer ?? '').trim(),
+      points: Number(q.points) > 0 ? Number(q.points) : 1,
+      negative_points: Number(q.negativePoints) || 0,
       difficulty: normalizeDifficulty(q.difficulty),
     }))
 

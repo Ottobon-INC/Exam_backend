@@ -979,6 +979,114 @@
       "examId": "12e4dd38-897f-4774-be43-056a7c703c09",
       "slotId": null,
       "assignedAt": "2026-08-29T16:16:36.972Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_a143d16f-343e-4cf2-be1f-9f40ab586b13": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "a143d16f-343e-4cf2-be1f-9f40ab586b13",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:01:15.851Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_a143d16f-343e-4cf2-be1f-9f40ab586b13": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-1456",
+      "examId": "a143d16f-343e-4cf2-be1f-9f40ab586b13",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:01:16.090Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_56aeddb2-d0f7-49f9-8000-124b9eb6b6a7": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "56aeddb2-d0f7-49f9-8000-124b9eb6b6a7",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:02:47.506Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_56aeddb2-d0f7-49f9-8000-124b9eb6b6a7": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-6522",
+      "examId": "56aeddb2-d0f7-49f9-8000-124b9eb6b6a7",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:02:47.730Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_1856b7d0-3007-4961-8a76-3e2ac7cbaaee": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "1856b7d0-3007-4961-8a76-3e2ac7cbaaee",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:07:18.869Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_1856b7d0-3007-4961-8a76-3e2ac7cbaaee": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-8830",
+      "examId": "1856b7d0-3007-4961-8a76-3e2ac7cbaaee",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:07:19.116Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_1be7731e-b588-42c5-a750-71789d906e14": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "1be7731e-b588-42c5-a750-71789d906e14",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:12:46.003Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_1be7731e-b588-42c5-a750-71789d906e14": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-4840",
+      "examId": "1be7731e-b588-42c5-a750-71789d906e14",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:12:46.246Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_5f2699f8-89c3-4a20-9f5f-4034e03fae4b": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "5f2699f8-89c3-4a20-9f5f-4034e03fae4b",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:17:54.120Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_5f2699f8-89c3-4a20-9f5f-4034e03fae4b": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-1287",
+      "examId": "5f2699f8-89c3-4a20-9f5f-4034e03fae4b",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:17:54.340Z"
+    },
+    "73195daa-85c2-4c4a-92cf-63851bca95fd_7d535cdd-85ff-4e9e-8fa6-3955d91d96ac": {
+      "candidateId": "73195daa-85c2-4c4a-92cf-63851bca95fd",
+      "name": "Kusuma Latha",
+      "email": "kusumalathakanchuboyina@gmail.com",
+      "rollNumber": "1234567890",
+      "examId": "7d535cdd-85ff-4e9e-8fa6-3955d91d96ac",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:23:45.189Z"
+    },
+    "79ee97c1-0d37-4a0a-84ff-d807e449b5d3_7d535cdd-85ff-4e9e-8fa6-3955d91d96ac": {
+      "candidateId": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
+      "name": "Venu Santosh",
+      "email": "g.venusanthosh@gmail.com",
+      "rollNumber": "STU-7248",
+      "examId": "7d535cdd-85ff-4e9e-8fa6-3955d91d96ac",
+      "slotId": null,
+      "assignedAt": "2026-08-29T17:23:45.412Z"
     }
   },
   "users": {
@@ -1261,12 +1369,12 @@
       "id": "73195daa-85c2-4c4a-92cf-63851bca95fd",
       "email": "kusumalathakanchuboyina@gmail.com",
       "name": "Kusuma Latha",
-      "password_hash": "$2a$10$l1Po6/2vbulinlea384q.efxntj49mMS118wJBcfUPmRp7Zk7MhhG",
+      "password_hash": "$2a$10$CMax4VuePiUTb8t3dNsATOh0dLGR7pgeRNfBg3LMOI/mUId4/tIRG",
       "role": "CANDIDATE",
       "roll_number": "1234567890",
       "created_at": "2026-08-29T14:40:32.143773+00:00",
       "updated_at": "2026-08-29T14:40:32.143773+00:00",
-      "raw_password": "Pass@8770"
+      "raw_password": "Pass@3953"
     },
     "g.venusantosh@gmail.com": {
       "id": "b4ad489d-3cb6-4ff9-b1c9-22905ec44f92",
@@ -1283,12 +1391,32 @@
       "id": "79ee97c1-0d37-4a0a-84ff-d807e449b5d3",
       "email": "g.venusanthosh@gmail.com",
       "name": "Venu Santosh",
-      "password_hash": "$2a$10$lFRteAsPDxQc3VPdV5f45O5PY1kpcxk61rDQbByxW.ldZoSBwnMCW",
+      "password_hash": "$2a$10$grIBS1IuD8igKF4ydDYb5O7vhMyk0BAOcNo/rh9plBZWtXc9ckgw6",
       "role": "CANDIDATE",
-      "roll_number": "STU-8194",
+      "roll_number": "STU-7248",
       "created_at": "2026-08-29T16:11:18.245065+00:00",
       "updated_at": "2026-08-29T16:11:18.245065+00:00",
-      "raw_password": "Pass@2273"
+      "raw_password": "Pass@6868"
+    }
+  },
+  "examSettings": {
+    "a143d16f-343e-4cf2-be1f-9f40ab586b13": {
+      "slotBookingEnabled": false
+    },
+    "56aeddb2-d0f7-49f9-8000-124b9eb6b6a7": {
+      "slotBookingEnabled": false
+    },
+    "1856b7d0-3007-4961-8a76-3e2ac7cbaaee": {
+      "slotBookingEnabled": false
+    },
+    "1be7731e-b588-42c5-a750-71789d906e14": {
+      "slotBookingEnabled": false
+    },
+    "5f2699f8-89c3-4a20-9f5f-4034e03fae4b": {
+      "slotBookingEnabled": false
+    },
+    "7d535cdd-85ff-4e9e-8fa6-3955d91d96ac": {
+      "slotBookingEnabled": false
     }
   }
 }

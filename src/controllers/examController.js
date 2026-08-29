@@ -1,5 +1,5 @@
 import { supabase } from '../config/db.js'
-import { memorySlots, memoryRegistrations } from './slotController.js'
+import { memorySlots, memoryRegistrations, memoryExamSettings, setExamSlotBookingSetting } from './slotController.js'
 
 export const getAllExams = async (req, res) => {
   try {
@@ -55,6 +55,7 @@ export const getAllExams = async (req, res) => {
         shuffleOptions: e.shuffle_options,
         showImmediateResults: e.published_results ?? false,
         publishedResults: e.published_results,
+        slotBookingEnabled: (memoryExamSettings.get(String(e.id))?.slotBookingEnabled !== undefined) ? memoryExamSettings.get(String(e.id)).slotBookingEnabled : (e.slot_booking_enabled !== false),
         expectedQuestionsCount,
         _count: {
           questions: questions.length,
@@ -130,6 +131,7 @@ export const getExamById = async (req, res) => {
         shuffleQuestions: exam.shuffle_questions,
         showImmediateResults: exam.published_results ?? false,
         publishedResults: exam.published_results,
+        slotBookingEnabled: (memoryExamSettings.get(String(exam.id))?.slotBookingEnabled !== undefined) ? memoryExamSettings.get(String(exam.id)).slotBookingEnabled : (exam.slot_booking_enabled !== false),
         expectedQuestionsCount,
         questions: formattedQuestions,
       },
@@ -162,26 +164,46 @@ export const createExam = async (req, res) => {
     // Resolve pass marks: admin-set value takes priority; fallback to 0 (never auto-set)
     const resolvedPassMarks = Number(passMarks ?? passingMarks ?? 0)
 
-    const { data: exam, error } = await supabase
+    const insertPayload = {
+      code: code.trim().toUpperCase(),
+      title,
+      description,
+      duration_minutes: durationMinutes || 60,
+      total_marks: totalMarks || 0,
+      pass_marks: resolvedPassMarks,
+      status: status || 'DRAFT',
+      proctoring_enabled: proctoringEnabled ?? true,
+      block_tab_switch: blockTabSwitch ?? true,
+      shuffle_questions: shuffleQuestions ?? true,
+      shuffle_options: shuffleOptions ?? true,
+      published_results: showImmediateResults ?? false,
+      slot_booking_enabled: req.body.slotBookingEnabled ?? req.body.slot_booking_enabled ?? true,
+    }
+
+    let { data: exam, error } = await supabase
       .from('ex_exams')
-      .insert({
-        code: code.trim().toUpperCase(),
-        title,
-        description,
-        duration_minutes: durationMinutes || 60,
-        total_marks: totalMarks || 0,
-        pass_marks: resolvedPassMarks,
-        status: status || 'DRAFT',
-        proctoring_enabled: proctoringEnabled ?? true,
-        block_tab_switch: blockTabSwitch ?? true,
-        shuffle_questions: shuffleQuestions ?? true,
-        shuffle_options: shuffleOptions ?? true,
-        published_results: showImmediateResults ?? false,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
+    if (error && (error.code === 'PGRST204' || String(error.message).includes('slot_booking_enabled'))) {
+      console.warn('⚠️ Supabase DB missing slot_booking_enabled column. Retrying insert without column...')
+      delete insertPayload.slot_booking_enabled
+      const retry = await supabase
+        .from('ex_exams')
+        .insert(insertPayload)
+        .select()
+        .single()
+      exam = retry.data
+      error = retry.error
+    }
+
     if (error) throw error
+
+    const slotSettingVal = req.body.slotBookingEnabled ?? req.body.slot_booking_enabled ?? true
+    if (exam && exam.id) {
+      setExamSlotBookingSetting(exam.id, slotSettingVal)
+    }
 
     res.status(201).json({ message: 'Exam created successfully', exam })
   } catch (error) {
@@ -199,7 +221,6 @@ export const updateExam = async (req, res) => {
     if (req.body.description !== undefined) updateData.description = req.body.description
     if (req.body.durationMinutes) updateData.duration_minutes = req.body.durationMinutes
     if (req.body.totalMarks !== undefined) updateData.total_marks = req.body.totalMarks
-    // Support both passMarks and passingMarks (frontend form uses passingMarks)
     if (req.body.passMarks !== undefined) updateData.pass_marks = Number(req.body.passMarks)
     if (req.body.passingMarks !== undefined) updateData.pass_marks = Number(req.body.passingMarks)
     if (req.body.status) updateData.status = req.body.status
@@ -207,15 +228,33 @@ export const updateExam = async (req, res) => {
     if (req.body.shuffleQuestions !== undefined) updateData.shuffle_questions = req.body.shuffleQuestions
     if (req.body.showImmediateResults !== undefined) updateData.published_results = req.body.showImmediateResults
     if (req.body.publishedResults !== undefined) updateData.published_results = req.body.publishedResults
+    if (req.body.slotBookingEnabled !== undefined) updateData.slot_booking_enabled = req.body.slotBookingEnabled
+    if (req.body.slot_booking_enabled !== undefined) updateData.slot_booking_enabled = req.body.slot_booking_enabled
 
-    const { data: exam, error } = await supabase
+    let { data: exam, error } = await supabase
       .from('ex_exams')
       .update(updateData)
       .eq('id', id)
       .select()
-      .single()
+
+    if (error && (error.code === 'PGRST204' || String(error.message).includes('slot_booking_enabled'))) {
+      console.warn('⚠️ Supabase DB missing slot_booking_enabled column. Retrying update without column...')
+      delete updateData.slot_booking_enabled
+      const retry = await supabase
+        .from('ex_exams')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+      exam = retry.data
+      error = retry.error
+    }
 
     if (error) throw error
+
+    const slotSettingVal = req.body.slotBookingEnabled ?? req.body.slot_booking_enabled
+    if (slotSettingVal !== undefined) {
+      setExamSlotBookingSetting(id, slotSettingVal)
+    }
 
     res.json({ message: 'Exam updated successfully', exam })
   } catch (error) {
@@ -305,6 +344,7 @@ export const notifyCandidates = async (req, res) => {
         examCode: exam.code,
         durationMinutes: exam.duration_minutes,
         totalMarks: exam.total_marks,
+        slotBookingEnabled: exam.slot_booking_enabled !== false,
         candidatePortalUrl: `${process.env.CORS_ORIGIN || 'http://localhost:5050'}/login`,
       })
       if (result.simulated) simulated = true

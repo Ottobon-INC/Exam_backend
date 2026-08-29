@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS public.ex_exams (
     shuffle_questions   BOOLEAN DEFAULT true NOT NULL,
     shuffle_options     BOOLEAN DEFAULT true NOT NULL,
     published_results   BOOLEAN DEFAULT false NOT NULL,
+    slot_booking_enabled BOOLEAN DEFAULT true NOT NULL,
     created_at          TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at          TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );

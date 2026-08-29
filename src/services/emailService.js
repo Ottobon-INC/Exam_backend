@@ -136,7 +136,8 @@ export const sendExamInvitationEmail = async ({
                 </tr>
               </table>
 
-              <!-- Slot Selection Instructions -->
+              <!-- Slot Selection / Direct Access Instructions -->
+              ${slotBookingEnabled !== false ? `
               <h3 style="margin:0 0 12px 0; font-size:16px; font-weight:800; color:#0f172a;">📅 Select Your Preferred Assessment Slot</h3>
               <p style="margin:0 0 14px 0; font-size:14px; color:#334155;">
                 You are <strong>not assigned a fixed exam time</strong>. Once you log in to the platform, you will be able to view the <strong>available assessment slots for Sunday</strong>.
@@ -154,6 +155,24 @@ export const sendExamInvitationEmail = async ({
               <p style="margin:0 0 24px 0; font-size:13px; color:#475569; line-height:1.6;">
                 We recommend selecting your preferred slot as early as possible based on availability. Once selected, make sure you are available and ready before your chosen assessment time.
               </p>
+              ` : `
+              <h3 style="margin:0 0 12px 0; font-size:16px; font-weight:800; color:#0f172a;">⚡ Direct Exam Access (No Slot Selection Required)</h3>
+              <p style="margin:0 0 14px 0; font-size:14px; color:#334155;">
+                You are <strong>not required to book a time slot</strong>. Once the assessment opens on Sunday, August 30, 2026:
+              </p>
+
+              <div style="background-color:#fafafa; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:28px;">
+                <ol style="margin:0; padding-left:20px; font-size:13px; color:#1e293b; line-height:1.8;">
+                  <li style="margin-bottom:6px;"><strong>Log in using your credentials above</strong></li>
+                  <li style="margin-bottom:6px;"><strong>Click "Start Assessment" directly on your candidate portal</strong></li>
+                  <li><strong>Complete your assessment within the allocated duration</strong></li>
+                </ol>
+              </div>
+
+              <p style="margin:0 0 24px 0; font-size:13px; color:#475569; line-height:1.6;">
+                Simply log in when you are ready to take your assessment on Sunday.
+              </p>
+              `}
 
               <hr style="border:0; border-top:1px solid #e2e8f0; margin:28px 0;" />
 
