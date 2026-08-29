@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.ex_users (
     email         TEXT UNIQUE NOT NULL,
     name          TEXT NOT NULL,
     password_hash TEXT NOT NULL,
+    raw_password  TEXT,
     role          TEXT NOT NULL DEFAULT 'CANDIDATE' CHECK (role IN ('SUPER_ADMIN', 'EXAMINER', 'PROCTOR', 'EVALUATOR', 'CANDIDATE')),
     roll_number   TEXT,
     created_at    TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -65,6 +66,21 @@ CREATE TABLE IF NOT EXISTS public.ex_exam_slots (
     end_time    TIMESTAMPTZ NOT NULL,
     capacity    INTEGER DEFAULT 30 NOT NULL,
     created_at  TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- ==============================================================================
+-- 3c. EXAM REGISTRATIONS Table (ex_exam_registrations)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.ex_exam_registrations (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_id         UUID NOT NULL REFERENCES public.ex_exams(id) ON DELETE CASCADE,
+    candidate_id    UUID NOT NULL REFERENCES public.ex_users(id) ON DELETE CASCADE,
+    slot_id         TEXT REFERENCES public.ex_exam_slots(id) ON DELETE SET NULL,
+    slot_start_time TIMESTAMPTZ,
+    slot_end_time   TIMESTAMPTZ,
+    assigned_at     TIMESTAMPTZ DEFAULT timezone('utc'::text, now()),
+    booked_at       TIMESTAMPTZ,
+    UNIQUE(exam_id, candidate_id)
 );
 
 -- ==============================================================================
@@ -139,13 +155,15 @@ CREATE TABLE IF NOT EXISTS public.ex_proctor_logs (
 -- ==============================================================================
 -- 8. Disable Row Level Security (Backend API uses service key)
 -- ==============================================================================
-ALTER TABLE public.ex_users           DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_exams           DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_exam_sections   DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_questions       DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_attempts        DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_answers         DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ex_proctor_logs    DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_users              DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_exams              DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_exam_sections      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_exam_slots         DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_exam_registrations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_questions          DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_attempts           DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_answers            DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ex_proctor_logs       DISABLE ROW LEVEL SECURITY;
 
 -- ==============================================================================
 -- 9. Indexes

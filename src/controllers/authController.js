@@ -99,6 +99,7 @@ export const register = async (req, res) => {
           name,
           email: email.toLowerCase().trim(),
           password_hash,
+          raw_password: password,
           role,
         }
       ])

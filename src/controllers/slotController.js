@@ -53,23 +53,24 @@ export const saveStateToDisk = () => {
 
 loadStateFromDisk()
 
+/**
+ * GET /api/slots/exams/:examId/slots
+ * Fetches all available time slots for an exam from DB and calculates booked & remaining seats.
+ */
 export const getExamSlots = async (req, res) => {
   try {
     const { examId } = req.params
 
-    let dbSlots = []
-    const { data, error } = await supabase
+    // 1. Fetch DB slots
+    const { data: dbSlots, error: slotError } = await supabase
       .from('ex_exam_slots')
       .select('*')
       .eq('exam_id', examId)
-
-    if (!error && data) {
-      dbSlots = data
-    }
+      .order('start_time', { ascending: true })
 
     const slotMap = new Map()
 
-    // Add memory slots matching examId case-insensitively
+    // Load memory fallbacks if present
     for (const [k, arr] of memorySlots.entries()) {
       if (String(k).toLowerCase() === String(examId).toLowerCase()) {
         (arr || []).forEach((s) => {
@@ -84,21 +85,22 @@ export const getExamSlots = async (req, res) => {
       }
     }
 
-    // Override / include database slots
-    dbSlots.forEach((s) => {
-      slotMap.set(s.id, {
-        id: s.id,
-        examId: s.exam_id || examId,
-        startTime: s.start_time || s.startTime,
-        endTime: s.end_time || s.endTime,
-        capacity: Number(s.capacity) || 30,
+    // Prioritize DB slots
+    if (!slotError && dbSlots) {
+      dbSlots.forEach((s) => {
+        slotMap.set(s.id, {
+          id: s.id,
+          examId: s.exam_id || examId,
+          startTime: s.start_time || s.startTime,
+          endTime: s.end_time || s.endTime,
+          capacity: Number(s.capacity) || 30,
+        })
       })
-    })
+    }
 
     const combinedSlots = Array.from(slotMap.values())
 
-
-    // Calculate booked counts
+    // 2. Fetch registrations to calculate booked counts
     const { data: dbRegs } = await supabase
       .from('ex_exam_registrations')
       .select('slot_id')
@@ -110,7 +112,9 @@ export const getExamSlots = async (req, res) => {
         bookedCount += dbRegs.filter((r) => r.slot_id === s.id).length
       }
       for (const reg of memoryRegistrations.values()) {
-        if (reg.slotId === s.id && reg.examId === examId) bookedCount++
+        if (reg.slotId === s.id && reg.examId === examId && !dbRegs?.some(r => r.slot_id === s.id)) {
+          bookedCount++
+        }
       }
 
       const capacity = Number(s.capacity) || 30
@@ -132,6 +136,10 @@ export const getExamSlots = async (req, res) => {
   }
 }
 
+/**
+ * POST /api/slots/exams/:examId/slots
+ * Creates a new time slot in ex_exam_slots.
+ */
 export const createExamSlot = async (req, res) => {
   try {
     const { examId } = req.params
@@ -142,24 +150,9 @@ export const createExamSlot = async (req, res) => {
     }
 
     const slotId = `slot_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
-    const slotObj = {
-      id: slotId,
-      examId,
-      exam_id: examId,
-      startTime,
-      start_time: startTime,
-      endTime,
-      end_time: endTime,
-      capacity: Number(capacity) || 30,
-    }
+    const slotCapacity = Number(capacity) || 30
 
-    // Always store in memory fallback
-    const key = String(examId)
-    if (!memorySlots.has(key)) memorySlots.set(key, [])
-    memorySlots.get(key).push(slotObj)
-    saveStateToDisk()
-
-    // Store in Supabase if available
+    // Store in Supabase DB
     const { data, error } = await supabase
       .from('ex_exam_slots')
       .insert({
@@ -167,14 +160,31 @@ export const createExamSlot = async (req, res) => {
         exam_id: examId,
         start_time: startTime,
         end_time: endTime,
-        capacity: Number(capacity) || 30,
+        capacity: slotCapacity,
       })
       .select()
       .maybeSingle()
 
     if (error) {
-      console.warn('Supabase slot insert warning (using memory fallback):', error.message)
+      console.warn('Supabase slot insert warning:', error.message)
     }
+
+    const slotObj = {
+      id: data?.id || slotId,
+      examId,
+      exam_id: examId,
+      startTime: data?.start_time || startTime,
+      start_time: data?.start_time || startTime,
+      endTime: data?.end_time || endTime,
+      end_time: data?.end_time || endTime,
+      capacity: data?.capacity || slotCapacity,
+    }
+
+    // Update memory backup
+    const key = String(examId)
+    if (!memorySlots.has(key)) memorySlots.set(key, [])
+    memorySlots.get(key).push(slotObj)
+    saveStateToDisk()
 
     res.status(201).json({ message: 'Slot created successfully', slot: slotObj })
   } catch (err) {
@@ -183,6 +193,57 @@ export const createExamSlot = async (req, res) => {
   }
 }
 
+/**
+ * POST /api/slots/exams/:examId/slots/bulk
+ * Bulk creates multiple time slots in a single database operation.
+ */
+export const bulkCreateSlots = async (req, res) => {
+  try {
+    const { examId } = req.params
+    const { slots } = req.body
+
+    if (!Array.isArray(slots) || slots.length === 0) {
+      return res.status(400).json({ error: 'No slots provided for bulk creation' })
+    }
+
+    const slotsToInsert = slots.map((s, idx) => ({
+      id: `slot_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 7)}`,
+      exam_id: examId,
+      start_time: s.startTime || s.start_time,
+      end_time: s.endTime || s.end_time,
+      capacity: Number(s.capacity) || 30,
+    }))
+
+    const { data, error } = await supabase
+      .from('ex_exam_slots')
+      .insert(slotsToInsert)
+      .select()
+
+    if (error) {
+      console.warn('Supabase bulk slot insert warning:', error.message)
+    }
+
+    const createdSlots = data || slotsToInsert
+    const key = String(examId)
+    if (!memorySlots.has(key)) memorySlots.set(key, [])
+    memorySlots.get(key).push(...createdSlots)
+    saveStateToDisk()
+
+    res.status(201).json({
+      message: `Successfully created ${createdSlots.length} slots`,
+      count: createdSlots.length,
+      slots: createdSlots,
+    })
+  } catch (err) {
+    console.error('Error bulk creating slots:', err)
+    res.status(500).json({ error: err.message || 'Failed to bulk create slots' })
+  }
+}
+
+/**
+ * DELETE /api/slots/exams/:examId/slots/:slotId
+ * Deletes a time slot from ex_exam_slots.
+ */
 export const deleteExamSlot = async (req, res) => {
   try {
     const { examId, slotId } = req.params
@@ -201,6 +262,10 @@ export const deleteExamSlot = async (req, res) => {
   }
 }
 
+/**
+ * POST /api/slots/exams/:examId/assign-candidates
+ * Bulk assigns candidates to an exam. Upserts users in ex_users and registers them in ex_exam_registrations.
+ */
 export const bulkAssignCandidates = async (req, res) => {
   try {
     const { examId } = req.params
@@ -224,6 +289,7 @@ export const bulkAssignCandidates = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10)
       let candidateUser = null
 
+      // Check existing user
       const { data: existing } = await supabase
         .from('ex_users')
         .select('*')
@@ -235,6 +301,7 @@ export const bulkAssignCandidates = async (req, res) => {
           .from('ex_users')
           .update({
             password_hash: hashedPassword,
+            raw_password: password,
             name,
             roll_number: rollNumber,
           })
@@ -242,7 +309,7 @@ export const bulkAssignCandidates = async (req, res) => {
           .select()
           .single()
 
-        candidateUser = updatedUser || { ...existing, password_hash: hashedPassword }
+        candidateUser = updatedUser || { ...existing, password_hash: hashedPassword, raw_password: password }
       } else {
         const { data: newUser, error: createErr } = await supabase
           .from('ex_users')
@@ -251,6 +318,7 @@ export const bulkAssignCandidates = async (req, res) => {
             email,
             roll_number: rollNumber,
             password_hash: hashedPassword,
+            raw_password: password,
             role: 'CANDIDATE',
           })
           .select()
@@ -264,12 +332,28 @@ export const bulkAssignCandidates = async (req, res) => {
             name,
             email,
             password_hash: hashedPassword,
+            raw_password: password,
             role: 'CANDIDATE',
             roll_number: rollNumber,
           }
         }
       }
+
       if (candidateUser) {
+        // Upsert into ex_exam_registrations in Supabase DB
+        const { error: regErr } = await supabase
+          .from('ex_exam_registrations')
+          .upsert({
+            exam_id: examId,
+            candidate_id: candidateUser.id,
+            assigned_at: new Date().toISOString(),
+          }, { onConflict: 'exam_id,candidate_id' })
+
+        if (regErr) {
+          console.warn('Registration DB upsert notice:', regErr.message)
+        }
+
+        // Memory fallback mirror
         const key = `${candidateUser.id}_${examId}`
         memoryRegistrations.set(key, {
           candidateId: candidateUser.id,
@@ -283,10 +367,6 @@ export const bulkAssignCandidates = async (req, res) => {
 
         memoryUsers.set(email, candidateUser)
 
-        await supabase.from('ex_exam_registrations').upsert({
-          exam_id: examId,
-          candidate_id: candidateUser.id,
-        })
         assignedCount++
         assignedList.push({
           name,
@@ -305,23 +385,28 @@ export const bulkAssignCandidates = async (req, res) => {
   }
 }
 
-
+/**
+ * GET /api/slots/candidate/assigned-exams
+ * Fetches exams assigned to the logged-in candidate with booking & attempt metadata.
+ */
 export const getCandidateAssignedExams = async (req, res) => {
   try {
     const candidateId = req.user.id
-
     const assignedExamIds = new Set()
-    for (const reg of memoryRegistrations.values()) {
-      if (reg.candidateId === candidateId) assignedExamIds.add(reg.examId)
-    }
 
+    // Fetch DB registrations
     const { data: dbRegs } = await supabase
       .from('ex_exam_registrations')
       .select('exam_id, slot_id, slot_start_time, slot_end_time')
       .eq('candidate_id', candidateId)
 
-    if (dbRegs) {
+    if (dbRegs && dbRegs.length > 0) {
       dbRegs.forEach((r) => assignedExamIds.add(r.exam_id))
+    }
+
+    // Memory fallback check
+    for (const reg of memoryRegistrations.values()) {
+      if (reg.candidateId === candidateId) assignedExamIds.add(reg.examId)
     }
 
     const { data: exams, error } = await supabase
@@ -393,6 +478,10 @@ export const getCandidateAssignedExams = async (req, res) => {
   }
 }
 
+/**
+ * POST /api/slots/exams/:examId/book-slot
+ * Candidate books a specific time slot for an exam.
+ */
 export const bookSlot = async (req, res) => {
   try {
     const { examId } = req.params
@@ -401,26 +490,64 @@ export const bookSlot = async (req, res) => {
 
     if (!slotId) return res.status(400).json({ error: 'Slot ID is required' })
 
-    let slots = []
-    for (const [k, arr] of memorySlots.entries()) {
-      if (String(k).toLowerCase() === String(examId).toLowerCase()) {
-        slots.push(...(arr || []))
+    // Fetch slot details from DB
+    let targetSlot = null
+    const { data: dbSlot } = await supabase
+      .from('ex_exam_slots')
+      .select('*')
+      .eq('id', slotId)
+      .maybeSingle()
+
+    if (dbSlot) {
+      targetSlot = dbSlot
+    } else {
+      for (const [k, arr] of memorySlots.entries()) {
+        if (String(k).toLowerCase() === String(examId).toLowerCase()) {
+          targetSlot = (arr || []).find((s) => s.id === slotId)
+          if (targetSlot) break
+        }
       }
     }
-    const { data: dbSlots } = await supabase.from('ex_exam_slots').select('*').eq('exam_id', examId)
-    if (dbSlots && dbSlots.length > 0) {
-      const slotMap = new Map()
-      slots.forEach((s) => slotMap.set(s.id, s))
-      dbSlots.forEach((s) => slotMap.set(s.id, s))
-      slots = Array.from(slotMap.values())
-    }
 
-    const targetSlot = slots.find((s) => s.id === slotId)
     if (!targetSlot) return res.status(404).json({ error: 'Slot not found' })
 
     const regKey = `${candidateId}_${examId}`
     const startTime = targetSlot.start_time || targetSlot.startTime
     const endTime = targetSlot.end_time || targetSlot.endTime
+    const nowIso = new Date().toISOString()
+
+    // 1. Ensure target slot exists in ex_exam_slots DB (satisfies Foreign Key)
+    try {
+      await supabase.from('ex_exam_slots').upsert({
+        id: String(targetSlot.id),
+        exam_id: examId,
+        start_time: startTime,
+        end_time: endTime,
+        capacity: targetSlot.capacity || 30,
+      })
+    } catch (sErr) {
+      console.warn('Slot DB sync notice:', sErr.message)
+    }
+
+    // 2. Upsert registration in Supabase ex_exam_registrations DB
+    const { data: updatedReg, error: dbErr } = await supabase
+      .from('ex_exam_registrations')
+      .upsert({
+        exam_id: examId,
+        candidate_id: candidateId,
+        slot_id: String(targetSlot.id),
+        slot_start_time: startTime,
+        slot_end_time: endTime,
+        booked_at: nowIso,
+      }, { onConflict: 'exam_id,candidate_id' })
+      .select()
+      .maybeSingle()
+
+    if (dbErr) {
+      console.error('❌ Booking DB upsert notice:', dbErr.message || dbErr)
+    } else {
+      console.log(`✅ Successfully persisted slot booking for candidate ${candidateId} in ex_exam_registrations!`)
+    }
 
     const booking = {
       candidateId,
@@ -428,20 +555,11 @@ export const bookSlot = async (req, res) => {
       slotId: targetSlot.id,
       startTime,
       endTime,
-      bookedAt: new Date().toISOString(),
+      bookedAt: nowIso,
     }
 
     memoryRegistrations.set(regKey, booking)
     saveStateToDisk()
-
-    await supabase.from('ex_exam_registrations').upsert({
-      exam_id: examId,
-      candidate_id: candidateId,
-      slot_id: targetSlot.id,
-      slot_start_time: startTime,
-      slot_end_time: endTime,
-      booked_at: booking.bookedAt,
-    })
 
     res.json({ message: 'Slot booked successfully', booking })
   } catch (err) {
@@ -450,30 +568,59 @@ export const bookSlot = async (req, res) => {
   }
 }
 
-
+/**
+ * GET /api/slots/exams/:examId/my-booking
+ * Fetches the logged-in candidate's booked slot for an exam.
+ */
 export const getMyBooking = async (req, res) => {
   try {
     const { examId } = req.params
     const candidateId = req.user.id
-    const regKey = `${candidateId}_${examId}`
 
-    let booking = memoryRegistrations.get(regKey)
-    if (!booking) {
-      const { data } = await supabase
-        .from('ex_exam_registrations')
-        .select('*')
-        .eq('candidate_id', candidateId)
-        .eq('exam_id', examId)
-        .maybeSingle()
+    let booking = null
 
-      if (data && data.slot_id) {
-        booking = {
-          slotId: data.slot_id,
-          examId: data.exam_id,
-          candidateId: data.candidate_id,
-          startTime: data.slot_start_time,
-          endTime: data.slot_end_time,
-          bookedAt: data.booked_at,
+    // Query Supabase DB ex_exam_registrations
+    const { data } = await supabase
+      .from('ex_exam_registrations')
+      .select('*')
+      .eq('candidate_id', candidateId)
+      .eq('exam_id', examId)
+      .maybeSingle()
+
+    if (data && data.slot_id) {
+      booking = {
+        slotId: data.slot_id,
+        examId: data.exam_id,
+        candidateId: data.candidate_id,
+        startTime: data.slot_start_time,
+        endTime: data.slot_end_time,
+        bookedAt: data.booked_at,
+      }
+    } else {
+      const regKey = `${candidateId}_${examId}`
+      const memReg = memoryRegistrations.get(regKey)
+      if (memReg && memReg.slotId) {
+        booking = memReg
+        // Auto-heal / sync missing memory booking directly into Supabase DB
+        try {
+          await supabase.from('ex_exam_slots').upsert({
+            id: String(memReg.slotId),
+            exam_id: examId,
+            start_time: memReg.startTime,
+            end_time: memReg.endTime,
+            capacity: 30,
+          })
+          await supabase.from('ex_exam_registrations').upsert({
+            exam_id: examId,
+            candidate_id: candidateId,
+            slot_id: String(memReg.slotId),
+            slot_start_time: memReg.startTime,
+            slot_end_time: memReg.endTime,
+            booked_at: memReg.bookedAt || new Date().toISOString(),
+          }, { onConflict: 'exam_id,candidate_id' })
+          console.log(`✅ Auto-synced missing memory booking for ${candidateId} to ex_exam_registrations Supabase DB!`)
+        } catch (syncErr) {
+          console.warn('Auto-sync memory booking notice:', syncErr.message)
         }
       }
     }
@@ -485,28 +632,16 @@ export const getMyBooking = async (req, res) => {
   }
 }
 
+/**
+ * GET /api/slots/exams/:examId/assigned-students
+ * Fetches all assigned candidates for an exam and their booked slot details.
+ */
 export const getAssignedStudents = async (req, res) => {
   try {
     const { examId } = req.params
     const candidatesMap = new Map()
 
-    // 1. Fetch memory fallbacks
-    for (const [key, reg] of memoryRegistrations.entries()) {
-      if (reg.examId === examId) {
-        candidatesMap.set(reg.candidateId, {
-          candidateId: reg.candidateId,
-          name: reg.name || 'Student Candidate',
-          email: reg.email || '',
-          rollNumber: reg.rollNumber || '',
-          slotId: reg.slotId || null,
-          slotStartTime: reg.startTime || null,
-          slotEndTime: reg.endTime || null,
-          assignedAt: reg.assignedAt || new Date().toISOString(),
-        })
-      }
-    }
-
-    // 2. Fetch database ex_exam_registrations
+    // 1. Fetch DB registrations
     const { data: dbRegs } = await supabase
       .from('ex_exam_registrations')
       .select('candidate_id, slot_id, slot_start_time, slot_end_time, assigned_at, booked_at')
@@ -527,19 +662,34 @@ export const getAssignedStudents = async (req, res) => {
 
       dbRegs.forEach((r) => {
         const u = userMap.get(r.candidate_id)
-        const existing = candidatesMap.get(r.candidate_id)
         candidatesMap.set(r.candidate_id, {
           candidateId: r.candidate_id,
-          name: u?.name || existing?.name || 'Student Candidate',
-          email: u?.email || existing?.email || '',
-          rollNumber: u?.roll_number || existing?.rollNumber || '',
-          slotId: r.slot_id || existing?.slotId,
-          slotStartTime: r.slot_start_time || existing?.slotStartTime,
-          slotEndTime: r.slot_end_time || existing?.slotEndTime,
-          assignedAt: r.assigned_at || existing?.assignedAt,
-          bookedAt: r.booked_at || existing?.bookedAt,
+          name: u?.name || 'Student Candidate',
+          email: u?.email || '',
+          rollNumber: u?.roll_number || '',
+          slotId: r.slot_id,
+          slotStartTime: r.slot_start_time,
+          slotEndTime: r.slot_end_time,
+          assignedAt: r.assigned_at,
+          bookedAt: r.booked_at,
         })
       })
+    }
+
+    // 2. Memory fallback merge
+    for (const [key, reg] of memoryRegistrations.entries()) {
+      if (reg.examId === examId && !candidatesMap.has(reg.candidateId)) {
+        candidatesMap.set(reg.candidateId, {
+          candidateId: reg.candidateId,
+          name: reg.name || 'Student Candidate',
+          email: reg.email || '',
+          rollNumber: reg.rollNumber || '',
+          slotId: reg.slotId || null,
+          slotStartTime: reg.startTime || null,
+          slotEndTime: reg.endTime || null,
+          assignedAt: reg.assignedAt || new Date().toISOString(),
+        })
+      }
     }
 
     const students = Array.from(candidatesMap.values())
@@ -550,6 +700,10 @@ export const getAssignedStudents = async (req, res) => {
   }
 }
 
+/**
+ * DELETE /api/slots/exams/:examId/assigned-students/:candidateId
+ * Removes a candidate assignment from an exam in ex_exam_registrations.
+ */
 export const removeAssignedCandidate = async (req, res) => {
   try {
     const { examId, candidateId } = req.params

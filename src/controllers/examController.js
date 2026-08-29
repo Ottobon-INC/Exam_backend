@@ -34,25 +34,11 @@ export const getAllExams = async (req, res) => {
         expectedQuestionsCount = questions.length
       }
 
-      // Memory slot fallback calculation
-      let memSlotCount = 0
-      for (const [k, arr] of memorySlots.entries()) {
-        if (String(k).toLowerCase() === String(e.id).toLowerCase()) {
-          memSlotCount += (arr || []).length
-        }
-      }
       const dbSlotCount = (e.ex_exam_slots || []).length
-      const totalSlots = Math.max(dbSlotCount, memSlotCount)
+      const totalSlots = dbSlotCount
 
-      // Memory student registration fallback calculation
-      let memStudentCount = 0
-      for (const reg of memoryRegistrations.values()) {
-        if (String(reg.examId).toLowerCase() === String(e.id).toLowerCase()) {
-          memStudentCount++
-        }
-      }
       const dbStudentCount = (e.ex_exam_registrations || []).length
-      const totalStudents = Math.max(dbStudentCount, memStudentCount)
+      const totalStudents = dbStudentCount
 
       return {
         id: e.id,
@@ -252,5 +238,86 @@ export const deleteExam = async (req, res) => {
   } catch (error) {
     console.error('Error deleting exam:', error)
     res.status(500).json({ error: error.message || 'Failed to delete exam' })
+  }
+}
+
+export const notifyCandidates = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { data: exam, error: examErr } = await supabase
+      .from('ex_exams')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (examErr || !exam) {
+      return res.status(404).json({ error: 'Exam not found' })
+    }
+
+    // Fetch assigned candidates from ex_exam_registrations joined with ex_users
+    const { data: dbRegs } = await supabase
+      .from('ex_exam_registrations')
+      .select('candidate_id')
+      .eq('exam_id', id)
+
+    let candidates = []
+    if (dbRegs && dbRegs.length > 0) {
+      const candidateIds = dbRegs.map((r) => r.candidate_id).filter(Boolean)
+      if (candidateIds.length > 0) {
+        const { data: userList } = await supabase
+          .from('ex_users')
+          .select('id, name, email, roll_number, raw_password')
+          .in('id', candidateIds)
+        candidates = userList || []
+      }
+    }
+
+    // Fallback merge from memoryRegistrations if present
+    for (const [regKey, reg] of memoryRegistrations.entries()) {
+      if (reg.examId === id && !candidates.some((c) => c.id === reg.candidateId || c.email === reg.email)) {
+        candidates.push({
+          id: reg.candidateId,
+          name: reg.name || 'Student Candidate',
+          email: reg.email,
+          roll_number: reg.rollNumber,
+          raw_password: reg.password || 'Pass@1234',
+        })
+      }
+    }
+
+    if (candidates.length === 0) {
+      return res.status(400).json({ error: 'No assigned candidates found for this exam. Please upload a student roster first.' })
+    }
+
+    const { sendExamInvitationEmail } = await import('../services/emailService.js')
+    let sentCount = 0
+    let simulated = false
+
+    for (const c of candidates) {
+      if (!c.email) continue
+      const result = await sendExamInvitationEmail({
+        candidateName: c.name || 'Student',
+        candidateEmail: c.email,
+        rollNumber: c.roll_number || 'STU-GEN',
+        rawPassword: c.raw_password || 'Pass@1234',
+        examTitle: exam.title,
+        examCode: exam.code,
+        durationMinutes: exam.duration_minutes,
+        totalMarks: exam.total_marks,
+        candidatePortalUrl: `${process.env.CORS_ORIGIN || 'http://localhost:5050'}/login`,
+      })
+      if (result.simulated) simulated = true
+      sentCount++
+    }
+
+    res.json({
+      message: `Successfully processed email invitations for ${sentCount} candidates!`,
+      sentCount,
+      simulated,
+    })
+  } catch (error) {
+    console.error('Error notifying candidates:', error)
+    res.status(500).json({ error: error.message || 'Failed to dispatch email invitations' })
   }
 }

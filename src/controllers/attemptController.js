@@ -112,23 +112,31 @@ export const startAttempt = async (req, res) => {
       if (attemptErr) throw attemptErr
       attempt = newAttempt
 
-      // Subset questions based on section rules (always shuffle pool to select random subset)
+      // Subset questions based on section rules & question limits (randomly samples 15 out of 100)
       const selectedQuestions = []
       if (sections.length > 0) {
         sections.forEach((sec) => {
           let secQs = allQuestions.filter((q) => q.section_id === sec.id)
-          secQs = shuffleArray(secQs) // Randomize pool so each candidate gets a random subset of 15 out of 100!
-          const limit = sec.max_questions_limit
-          const count = limit && limit > 0 ? Math.min(secQs.length, limit) : secQs.length
+          // Always shuffle pool so candidate receives a true random subset
+          secQs = shuffleArray(secQs)
+          const limit = sec.max_questions_limit || sec.maxQuestionsLimit
+          const count = limit && Number(limit) > 0 ? Math.min(secQs.length, Number(limit)) : secQs.length
           selectedQuestions.push(...secQs.slice(0, count))
         })
+
         let unsectioned = allQuestions.filter((q) => !q.section_id)
-        if (shuffle) unsectioned = shuffleArray(unsectioned)
-        selectedQuestions.push(...unsectioned)
+        if (unsectioned.length > 0) {
+          unsectioned = shuffleArray(unsectioned)
+          const unSecLimit = examData.expected_questions_count || examData.max_questions_limit || examData.question_limit
+          const count = unSecLimit && Number(unSecLimit) > 0 ? Math.min(unsectioned.length, Number(unSecLimit)) : unsectioned.length
+          selectedQuestions.push(...unsectioned.slice(0, count))
+        }
       } else {
-        let qs = [...allQuestions]
-        if (shuffle) qs = shuffleArray(qs)
-        selectedQuestions.push(...qs)
+        // Unsectioned exam — shuffle 100 questions pool and pick random subset of 15
+        let qs = shuffleArray(allQuestions)
+        const limit = examData.expected_questions_count || examData.max_questions_limit || examData.question_limit
+        const count = limit && Number(limit) > 0 ? Math.min(qs.length, Number(limit)) : qs.length
+        selectedQuestions.push(...qs.slice(0, count))
       }
 
       // Pre-insert answers to lock this subset to the attempt
@@ -646,5 +654,138 @@ export const sendScoreEmail = async (req, res) => {
   } catch (err) {
     console.error('Error sending score email:', err)
     res.status(500).json({ error: err.message || 'Failed to dispatch email' })
+  }
+}
+
+/**
+ * GET /api/exams/:id/export-itemized-results
+ * Admin-only CSV export mapping every student's selected answer against the original question & correct answer key.
+ */
+export const exportItemizedResultsCSV = async (req, res) => {
+  try {
+    const examId = req.params.id || req.params.examId
+    if (!examId || examId === 'undefined') {
+      return res.status(400).json({ error: 'Valid exam ID is required' })
+    }
+
+    // 1. Fetch Exam metadata & all questions
+    const { data: exam, error: examErr } = await supabase
+      .from('ex_exams')
+      .select('id, title, code, total_marks, pass_marks, ex_questions(id, statement, type, options_json, correct_answer, points, section_id)')
+      .eq('id', examId)
+      .single()
+
+    if (examErr || !exam) {
+      return res.status(404).json({ error: 'Exam not found' })
+    }
+
+    const questions = exam.ex_questions || []
+    questions.sort((a, b) => (a.statement || '').localeCompare(b.statement || ''))
+
+    // 2. Fetch all attempts with answers
+    const { data: attempts, error: attErr } = await supabase
+      .from('ex_attempts')
+      .select('*, ex_answers(*)')
+      .eq('exam_id', examId)
+
+    if (attErr) throw attErr
+
+    // 3. Fetch candidate user details
+    const candidateIds = Array.from(new Set((attempts || []).map((a) => a.candidate_id).filter(Boolean)))
+    let users = []
+    if (candidateIds.length > 0) {
+      const { data: userList } = await supabase
+        .from('ex_users')
+        .select('id, name, email, roll_number')
+        .in('id', candidateIds)
+      users = userList || []
+    }
+    const userMap = new Map(users.map((u) => [u.id, u]))
+
+    // 4. Build CSV Headers
+    const baseHeaders = [
+      'Rank',
+      'Roll Number',
+      'Candidate Name',
+      'Candidate Email',
+      'Attempt Status',
+      'Total Score Obtained',
+      'Max Total Score',
+      'Percentage (%)',
+      'Pass Cutoff Met',
+      'Violations Count',
+      'Started At',
+      'Submitted At',
+    ]
+
+    const questionHeaders = []
+    questions.forEach((q, idx) => {
+      const qNum = idx + 1
+      questionHeaders.push(`Q${qNum} Statement`)
+      questionHeaders.push(`Q${qNum} Candidate Selected Answer`)
+      questionHeaders.push(`Q${qNum} Expected Correct Key`)
+      questionHeaders.push(`Q${qNum} Score Awarded`)
+      questionHeaders.push(`Q${qNum} Answer Status`)
+    })
+
+    const allHeaders = [...baseHeaders, ...questionHeaders]
+
+    const escapeCsv = (str) => {
+      if (str === null || str === undefined) return '""'
+      const stringified = String(str).replace(/"/g, '""')
+      return `"${stringified}"`
+    }
+
+    const sortedAttempts = [...(attempts || [])].sort((a, b) => (Number(b.total_score) || 0) - (Number(a.total_score) || 0))
+
+    const csvRows = [allHeaders.map(escapeCsv).join(',')]
+
+    sortedAttempts.forEach((att, rankIdx) => {
+      const u = userMap.get(att.candidate_id)
+      const answersMap = new Map((att.ex_answers || []).map((ans) => [ans.question_id, ans]))
+
+      const rowValues = [
+        rankIdx + 1,
+        u?.roll_number || '',
+        u?.name || 'Candidate',
+        u?.email || '',
+        att.status,
+        Number(att.total_score) || 0,
+        exam.total_marks || 100,
+        `${Number(att.percentage) || 0}%`,
+        att.sectional_pass === false ? 'FAILED (Cutoff Not Met)' : (att.total_score >= (exam.pass_marks || 0) ? 'PASSED' : 'FAILED'),
+        att.violations || 0,
+        att.started_at || '',
+        att.submitted_at || '',
+      ]
+
+      questions.forEach((q) => {
+        const ans = answersMap.get(q.id)
+        const selectedOpt = ans?.selected_option || ans?.text_answer || 'Unattempted'
+        const correctKey = q.correct_answer || ''
+        const scoreAwarded = ans ? (Number(ans.score_awarded) || 0) : 0
+
+        let status = 'UNATTEMPTED'
+        if (ans && (ans.selected_option || ans.text_answer)) {
+          status = scoreAwarded > 0 ? 'CORRECT' : (scoreAwarded < 0 ? 'WRONG (PENALTY)' : 'INCORRECT')
+        }
+
+        rowValues.push(q.statement || '')
+        rowValues.push(selectedOpt)
+        rowValues.push(correctKey)
+        rowValues.push(scoreAwarded)
+        rowValues.push(status)
+      })
+
+      csvRows.push(rowValues.map(escapeCsv).join(','))
+    })
+
+    const csvContent = csvRows.join('\n')
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+    res.setHeader('Content-Disposition', `attachment; filename="${exam.code || 'exam'}_itemized_results_report.csv"`)
+    res.send(csvContent)
+  } catch (err) {
+    console.error('Error exporting CSV itemized report:', err)
+    res.status(500).json({ error: err.message || 'Failed to export itemized results CSV report' })
   }
 }
