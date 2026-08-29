@@ -32,13 +32,14 @@ export const setupProctorSocket = (io) => {
         proctorNamespace.to(examId).emit('candidate_online', candidateData)
         proctorNamespace.to('GLOBAL_PROCTORS').emit('candidate_online', candidateData)
       } else if (role === 'PROCTOR') {
-        // Send all existing active candidates and their latest frames to the newly joined proctor
-        const roomCandidates = examRooms.get(examId)
-        if (roomCandidates) {
+        // Send all existing active candidates across all exam rooms to the newly joined proctor
+        for (const [eId, roomCandidates] of examRooms.entries()) {
+          if (examId !== 'ALL' && String(eId) !== String(examId)) continue
           for (const [cId, cData] of roomCandidates.entries()) {
-            socket.emit('candidate_online', cData)
+            socket.emit('candidate_online', { ...cData, examId: eId })
             if (cData.latestFrame) {
               socket.emit('proctor_frame_stream', {
+                examId: eId,
                 candidateId: cId,
                 candidateName: cData.candidateName,
                 rollNumber: cData.rollNumber,
@@ -66,6 +67,7 @@ export const setupProctorSocket = (io) => {
 
       // Broadcast to this exam room and all connected proctors
       const payload = {
+        examId,
         candidateId,
         candidateName,
         rollNumber,
