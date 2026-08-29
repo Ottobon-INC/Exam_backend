@@ -2,19 +2,14 @@ import { supabase } from '../config/db.js'
 import { memoryRegistrations } from './slotController.js'
 
 export const computeSectionScores = (sections, allQuestions, attemptAnswers) => {
-  const answeredQIds = new Set((attemptAnswers || []).map((a) => a.question_id))
-  const servedQuestions = (attemptAnswers || []).length > 0
-    ? allQuestions.filter((q) => answeredQIds.has(q.id))
-    : allQuestions
+  const answerMap = new Map((attemptAnswers || []).map((a) => [a.question_id, Number(a.score_awarded) || 0]))
 
   return sections.map((sec) => {
-    const secQs = servedQuestions.filter((q) => q.section_id === sec.id)
-    const secQIds = secQs.map((q) => q.id)
-    const secAnswers = (attemptAnswers || []).filter((a) => secQIds.includes(a.question_id))
-    const score = secAnswers.reduce((sum, a) => sum + (Number(a.score_awarded) || 0), 0)
+    const secQs = (allQuestions || []).filter((q) => q.section_id === sec.id)
+    const score = secQs.reduce((sum, q) => sum + (answerMap.get(q.id) || 0), 0)
     const totalSecMarks = secQs.reduce((sum, q) => sum + (Number(q.points) || 1), 0)
 
-    // Treat cutoff_marks as a percentage (%) of served section total points
+    // Cutoff marks as percentage (%) of section max points
     const cutoffPercentage = Number(sec.cutoff_marks) || 0
     const requiredScore = totalSecMarks > 0 ? (cutoffPercentage / 100) * totalSecMarks : 0
     const cutoffMet = score >= requiredScore
@@ -371,7 +366,7 @@ export const submitAttempt = async (req, res) => {
     totalScore = Math.max(0, totalScore)
     const percentage = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0
 
-    let sectionalPass = null
+    let sectionalPass = true
     if (sections.length > 0) {
       const { data: freshAnswers } = await supabase
         .from('ex_answers')
