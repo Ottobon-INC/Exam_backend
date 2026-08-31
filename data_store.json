@@ -1458,6 +1458,9 @@
     },
     "ed227752-ed24-4cae-a319-a3fb7c36067e": {
       "slotBookingEnabled": false
+    },
+    "3aced55c-11f6-47b6-afdd-0d31274d2396": {
+      "slotBookingEnabled": true
     }
   }
 }

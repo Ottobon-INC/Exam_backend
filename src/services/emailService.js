@@ -55,7 +55,7 @@ export const sendExamInvitationEmail = async ({
 <body style="margin:0; padding:0; background-color:#f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a; line-height:1.6;">
   <!-- Inbox Preheader Text (Visible in Email Client Preview) -->
   <div style="display:none; font-size:1px; color:#ffffff; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
-    Ottobon Academy — AI Engineer Program with Claude. Your registration is confirmed! Log in to select your Sunday assessment slot today.
+    Ottobon Academy — AI Engineer Program with Claude. Your registration is confirmed! Log in to select your Monday assessment slot today.
   </div>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f1f5f9; padding:30px 10px;">
     <tr>
@@ -103,7 +103,7 @@ export const sendExamInvitationEmail = async ({
               <!-- Date Badge -->
               <div style="background-color:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:18px; text-align:center; margin-bottom:28px;">
                 <span style="font-size:11px; font-weight:800; color:#4338ca; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">Scheduled Assessment Date</span>
-                <span style="font-size:20px; font-weight:900; color:#1e1b4b; display:block;">Sunday, August 30, 2026</span>
+                <span style="font-size:20px; font-weight:900; color:#1e1b4b; display:block;">Monday, August 31, 2026</span>
                 <span style="font-size:12px; color:#4f46e5; font-weight:600; margin-top:4px; display:block;">First step toward entering the AI Engineer Cohort Program with Claude</span>
               </div>
 
@@ -139,13 +139,13 @@ export const sendExamInvitationEmail = async ({
               <!-- Slot Selection / Assessment Instructions -->
               <h3 style="margin:0 0 12px 0; font-size:16px; font-weight:800; color:#0f172a;">📅 Select Your Preferred Assessment Slot</h3>
               <p style="margin:0 0 14px 0; font-size:14px; color:#334155;">
-                You are <strong>not assigned a fixed exam time</strong>. Once you log in to the platform, you will be able to view the <strong>available assessment slots for Sunday</strong>.
+                You are <strong>not assigned a fixed exam time</strong>. Once you log in to the platform, you will be able to view the <strong>available assessment slots for Monday</strong>.
               </p>
 
               <div style="background-color:#fafafa; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:28px;">
                 <ol style="margin:0; padding-left:20px; font-size:13px; color:#1e293b; line-height:1.8;">
                   <li style="margin-bottom:6px;"><strong>Log in using your credentials</strong></li>
-                  <li style="margin-bottom:6px;"><strong>View the available Sunday slots</strong></li>
+                  <li style="margin-bottom:6px;"><strong>View the available Monday slots</strong></li>
                   <li style="margin-bottom:6px;"><strong>Select the slot that works best for you</strong></li>
                   <li><strong>Attend the assessment during your selected slot</strong></li>
                 </ol>
@@ -223,10 +223,10 @@ export const sendExamInvitationEmail = async ({
 
               <!-- Checklist Box -->
               <div style="background-color:#f8fafc; border:1px solid #cbd5e1; border-radius:14px; padding:20px; margin-bottom:32px;">
-                <h3 style="margin:0 0 14px 0; font-size:15px; font-weight:800; color:#0f172a;">📋 Before Sunday — Quick Checklist</h3>
+                <h3 style="margin:0 0 14px 0; font-size:15px; font-weight:800; color:#0f172a;">📋 Before Monday — Quick Checklist</h3>
                 <table width="100%" border="0" cellspacing="0" cellpadding="4" style="font-size:13px; color:#334155;">
                   <tr><td>✓ Successfully logged into the platform</td></tr>
-                  <tr><td>✓ Selected your preferred available Sunday slot</td></tr>
+                  <tr><td>✓ Selected your preferred available Monday slot</td></tr>
                   <tr><td>✓ A laptop or desktop ready</td></tr>
                   <tr><td>✓ A stable internet connection</td></tr>
                   <tr><td>✓ Your login credentials available</td></tr>

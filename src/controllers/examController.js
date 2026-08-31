@@ -1,5 +1,5 @@
 import { supabase } from '../config/db.js'
-import { memorySlots, memoryRegistrations, memoryExamSettings, setExamSlotBookingSetting } from './slotController.js'
+import { memorySlots, memoryRegistrations, memoryExamSettings, setExamSlotBookingSetting, saveStateToDisk } from './slotController.js'
 
 export const getAllExams = async (req, res) => {
   try {
@@ -283,6 +283,8 @@ export const deleteExam = async (req, res) => {
 export const notifyCandidates = async (req, res) => {
   try {
     const { id } = req.params
+    const forceResend = req.body?.forceResend === true || req.query?.force === 'true'
+    const targetCandidateId = req.body?.candidateId
 
     const { data: exam, error: examErr } = await supabase
       .from('ex_exams')
@@ -294,13 +296,13 @@ export const notifyCandidates = async (req, res) => {
       return res.status(404).json({ error: 'Exam not found' })
     }
 
-    // Fetch assigned candidates from ex_exam_registrations joined with ex_users
     const { data: dbRegs } = await supabase
       .from('ex_exam_registrations')
-      .select('candidate_id')
+      .select('*')
       .eq('exam_id', id)
 
-    let candidates = []
+    const candidatesMap = new Map()
+
     if (dbRegs && dbRegs.length > 0) {
       const candidateIds = dbRegs.map((r) => r.candidate_id).filter(Boolean)
       if (candidateIds.length > 0) {
@@ -308,32 +310,78 @@ export const notifyCandidates = async (req, res) => {
           .from('ex_users')
           .select('id, name, email, roll_number, raw_password')
           .in('id', candidateIds)
-        candidates = userList || []
-      }
-    }
 
-    // Fallback merge from memoryRegistrations if present
-    for (const [regKey, reg] of memoryRegistrations.entries()) {
-      if (reg.examId === id && !candidates.some((c) => c.id === reg.candidateId || c.email === reg.email)) {
-        candidates.push({
-          id: reg.candidateId,
-          name: reg.name || 'Student Candidate',
-          email: reg.email,
-          roll_number: reg.rollNumber,
-          raw_password: reg.password || 'Pass@1234',
+        const userMap = new Map((userList || []).map((u) => [u.id, u]))
+        dbRegs.forEach((r) => {
+          const u = userMap.get(r.candidate_id)
+          if (u) {
+            candidatesMap.set(u.id, {
+              id: u.id,
+              name: u.name || 'Student Candidate',
+              email: u.email,
+              roll_number: u.roll_number,
+              raw_password: u.raw_password || 'Pass@1234',
+              email_sent: r.email_sent || false,
+              email_sent_at: r.email_sent_at || null,
+            })
+          }
         })
       }
     }
+
+    for (const [regKey, reg] of memoryRegistrations.entries()) {
+      if (reg.examId === id) {
+        const existing = candidatesMap.get(reg.candidateId)
+        if (!existing) {
+          candidatesMap.set(reg.candidateId, {
+            id: reg.candidateId,
+            name: reg.name || 'Student Candidate',
+            email: reg.email,
+            roll_number: reg.rollNumber,
+            raw_password: reg.password || 'Pass@1234',
+            email_sent: reg.emailSent || false,
+            email_sent_at: reg.emailSentAt || null,
+          })
+        } else {
+          if (reg.emailSent) {
+            existing.email_sent = true
+            existing.email_sent_at = reg.emailSentAt
+          }
+        }
+      }
+    }
+
+    const candidates = Array.from(candidatesMap.values())
 
     if (candidates.length === 0) {
       return res.status(400).json({ error: 'No assigned candidates found for this exam. Please upload a student roster first.' })
     }
 
+    let candidatesToNotify = candidates
+    if (targetCandidateId) {
+      candidatesToNotify = candidates.filter((c) => String(c.id) === String(targetCandidateId))
+    } else if (!forceResend) {
+      candidatesToNotify = candidates.filter((c) => !c.email_sent)
+    }
+
+    const skippedCount = candidates.length - candidatesToNotify.length
+
+    if (candidatesToNotify.length === 0) {
+      return res.json({
+        message: `All ${candidates.length} assigned candidate(s) have already received their invitation emails. No duplicate emails sent.`,
+        sentCount: 0,
+        skippedCount,
+        totalCandidates: candidates.length,
+        simulated: false,
+      })
+    }
+
     const { sendExamInvitationEmail } = await import('../services/emailService.js')
     let sentCount = 0
     let simulated = false
+    const nowStr = new Date().toISOString()
 
-    for (const c of candidates) {
+    for (const c of candidatesToNotify) {
       if (!c.email) continue
       const result = await sendExamInvitationEmail({
         candidateName: c.name || 'Student',
@@ -349,11 +397,43 @@ export const notifyCandidates = async (req, res) => {
       })
       if (result.simulated) simulated = true
       sentCount++
+
+      c.email_sent = true
+      c.email_sent_at = nowStr
+
+      try {
+        await supabase
+          .from('ex_exam_registrations')
+          .update({
+            email_sent: true,
+            email_sent_at: nowStr,
+          })
+          .eq('exam_id', id)
+          .eq('candidate_id', c.id)
+      } catch (dbErr) {
+        console.warn('Notice: Could not update email_sent status in DB schema:', dbErr.message)
+      }
+
+      for (const [mKey, mVal] of memoryRegistrations.entries()) {
+        if (mVal.examId === id && mVal.candidateId === c.id) {
+          mVal.emailSent = true
+          mVal.emailSentAt = nowStr
+        }
+      }
+    }
+
+    saveStateToDisk()
+
+    let message = `Successfully processed email invitations for ${sentCount} candidate(s)!`
+    if (skippedCount > 0) {
+      message += ` (${skippedCount} candidate(s) skipped as email was already sent previously)`
     }
 
     res.json({
-      message: `Successfully processed email invitations for ${sentCount} candidates!`,
+      message,
       sentCount,
+      skippedCount,
+      totalCandidates: candidates.length,
       simulated,
     })
   } catch (error) {

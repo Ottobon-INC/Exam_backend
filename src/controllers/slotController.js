@@ -368,14 +368,17 @@ export const bulkAssignCandidates = async (req, res) => {
 
         // Memory fallback mirror
         const key = `${candidateUser.id}_${examId}`
+        const existingMem = memoryRegistrations.get(key)
         memoryRegistrations.set(key, {
           candidateId: candidateUser.id,
           name,
           email,
           rollNumber,
           examId,
-          slotId: null,
-          assignedAt: new Date().toISOString(),
+          slotId: existingMem?.slotId || null,
+          assignedAt: existingMem?.assignedAt || new Date().toISOString(),
+          emailSent: existingMem?.emailSent || false,
+          emailSentAt: existingMem?.emailSentAt || null,
         })
 
         memoryUsers.set(email, candidateUser)
@@ -690,7 +693,7 @@ export const getAssignedStudents = async (req, res) => {
     // 1. Fetch DB registrations
     const { data: dbRegs } = await supabase
       .from('ex_exam_registrations')
-      .select('candidate_id, slot_id, slot_start_time, slot_end_time, assigned_at, booked_at')
+      .select('*')
       .eq('exam_id', examId)
 
     if (dbRegs && dbRegs.length > 0) {
@@ -718,23 +721,35 @@ export const getAssignedStudents = async (req, res) => {
           slotEndTime: r.slot_end_time,
           assignedAt: r.assigned_at,
           bookedAt: r.booked_at,
+          emailSent: r.email_sent || false,
+          emailSentAt: r.email_sent_at || null,
         })
       })
     }
 
     // 2. Memory fallback merge
     for (const [key, reg] of memoryRegistrations.entries()) {
-      if (reg.examId === examId && !candidatesMap.has(reg.candidateId)) {
-        candidatesMap.set(reg.candidateId, {
-          candidateId: reg.candidateId,
-          name: reg.name || 'Student Candidate',
-          email: reg.email || '',
-          rollNumber: reg.rollNumber || '',
-          slotId: reg.slotId || null,
-          slotStartTime: reg.startTime || null,
-          slotEndTime: reg.endTime || null,
-          assignedAt: reg.assignedAt || new Date().toISOString(),
-        })
+      if (reg.examId === examId) {
+        const existing = candidatesMap.get(reg.candidateId)
+        if (!existing) {
+          candidatesMap.set(reg.candidateId, {
+            candidateId: reg.candidateId,
+            name: reg.name || 'Student Candidate',
+            email: reg.email || '',
+            rollNumber: reg.rollNumber || '',
+            slotId: reg.slotId || null,
+            slotStartTime: reg.startTime || null,
+            slotEndTime: reg.endTime || null,
+            assignedAt: reg.assignedAt || new Date().toISOString(),
+            emailSent: reg.emailSent || false,
+            emailSentAt: reg.emailSentAt || null,
+          })
+        } else {
+          if (reg.emailSent) {
+            existing.emailSent = true
+            existing.emailSentAt = reg.emailSentAt
+          }
+        }
       }
     }
 

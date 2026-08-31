@@ -81,8 +81,13 @@ CREATE TABLE IF NOT EXISTS public.ex_exam_registrations (
     slot_end_time   TIMESTAMPTZ,
     assigned_at     TIMESTAMPTZ DEFAULT timezone('utc'::text, now()),
     booked_at       TIMESTAMPTZ,
+    email_sent      BOOLEAN DEFAULT false NOT NULL,
+    email_sent_at   TIMESTAMPTZ,
     UNIQUE(exam_id, candidate_id)
 );
+
+ALTER TABLE public.ex_exam_registrations ADD COLUMN IF NOT EXISTS email_sent BOOLEAN DEFAULT false NOT NULL;
+ALTER TABLE public.ex_exam_registrations ADD COLUMN IF NOT EXISTS email_sent_at TIMESTAMPTZ;
 
 -- ==============================================================================
 -- 4. QUESTIONS Table (ex_questions)
